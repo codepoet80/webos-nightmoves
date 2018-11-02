@@ -1,0 +1,7 @@
+/* TODO: put your application-specific CSS here */
+.palm-page-header .header-icon.nightmoves {
+    background: url(../images/header-icon.png) no-repeat; background-size: 32px 32px; 
+}
+.palm-page-header .dark {
+    background-color: #060606;
+}
