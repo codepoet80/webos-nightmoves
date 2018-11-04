@@ -2,20 +2,20 @@ function MainAssistant() {
 	
 }
 var appSettingsCurrent;
-var dateString = "August 25, 2001 ";
+var baseDateString = "August 25, 2001 ";
 var appSettingsDefaults = {
-	MornEnabled: false,
-	MornStart: dateString + "06:00:00",
-	MornBright: '90',
-	MornVolume: '70',
-	EveEnabled: false,
-	EveStart: dateString + "19:30:00",
-	EveBright: '40',
-	EveVolume: '30',
-	NiteEnabled: false,
-	NiteStart: dateString + "22:00:00",
-	NiteBright: '5',
-	NiteVolume: '1'
+	MornEnabled: 'false',
+	MornStart: baseDateString + "06:00:00",
+	MornBright: 90,
+	MornVolume: 70,
+	EveEnabled: 'false',
+	EveStart: baseDateString + "19:30:00",
+	EveBright: 40,
+	EveVolume: 30,
+	NiteEnabled: 'false',
+	NiteStart: baseDateString + "22:00:00",
+	NiteBright: 5,
+	NiteVolume: 1
 };
 
 MainAssistant.prototype.loadSettings = function () {
@@ -24,37 +24,61 @@ MainAssistant.prototype.loadSettings = function () {
 	try
 	{
 		appSettings = settingsCookie.get();
-		Mojo.Log.info("cookie had: " + typeof(appSettings));
-		if (typeof settingsCookie.get() === "undefined" || settingsCookie.get() == null) {
-			Mojo.Log.info("Using first run defaults!");
+		if (typeof appSettings === "undefined" || appSettings == null || !this.checkSettingsValid(appSettings)) {
+			Mojo.Log.info("** Using first run default settings");
 			var appSettings = appSettingsDefaults;
 		}
 		else
 		{
-			Mojo.Log.info("Using cookie settings!");
-			Mojo.Log.info("settings are: " + settingsCookie.get())
-			appSettings = settingsCookie.get();
+			Mojo.Log.info("** Using cookie settings!");
+			Mojo.Log.info(JSON.stringify(appSettings))
 		}
 	}
 	catch(ex)
 	{
 		appSettings = appSettingsDefaults;
 		settingsCookie.put(null);
-		Mojo.Log.error("Settings cookie was corrupt and has been purged!");
+		Mojo.Log.error("** Settings cookie were corrupt and have been purged!");
 	}
 	return appSettings;
 }
+
+MainAssistant.prototype.checkSettingsValid = function (loadedSettings)
+{
+	var retValue = true;
+	for (var key in appSettingsDefaults) {
+		if (typeof loadedSettings[key] === undefined || loadedSettings[key] == null)
+		{
+			Mojo.Log.warn("** An expected saved setting, " + key + ", was null or undefined.");
+			retValue = false;
+		}
+		if (typeof loadedSettings[key] !== typeof appSettingsDefaults[key])
+		{
+			Mojo.Log.warn("** A saved setting, " + key + ", was of type " + typeof(loadedSettings[key]) + " but expected type " + typeof(appSettingsDefaults[key]));
+			retValue = false;
+		}
+		if (typeof appSettingsDefaults[key] === "string" && appSettingsDefaults[key].indexOf(baseDateString) != -1 && loadedSettings[key].indexOf(baseDateString))
+		{
+			Mojo.Log.info("** A saved time setting did not have the expected date value.");
+			retValue = false;
+		}
+		if (typeof appSettingsDefaults[key] === "string" && (appSettingsDefaults[key] == "false" || appSettingsDefaults[key] == "true"))
+		{
+			if (loadedSettings[key] != "false" && loadedSettings[key] != "true")
+			{
+				Mojo.Log.info("** A saved time setting did not have the expected boolean value.");
+				retValue = false;
+			}
+		}
+	 }
+	 return retValue;
+}
 	
-/*
-* Called before scene is visible, before any transitions take place,and before widgets are rendered.
-* The scene assistant may attach event listeners to divs for widgets, as they will remain in place after the widgets are rendered.
-* Transition to bring scene on stage begins after this method returns.
-*/
+/* Called before scene is visible, before any transitions take place,and before widgets are rendered. */
 MainAssistant.prototype.setup = function(){
 
 	this.appSettingsCurrent = this.loadSettings();
-	Mojo.Log.info("default settings: " + JSON.stringify(appSettingsDefaults));
-	Mojo.Log.info("loaded settings: " + JSON.stringify(appSettingsCurrent));
+	Mojo.Log.info("** Loaded Settings: " + JSON.stringify(this.appSettingsCurrent));
 	
 	//Setup toggles
 	this.timeTapped = this.timeTapped.bind(this);
@@ -81,17 +105,12 @@ MainAssistant.prototype.setup = function(){
 	this.controller.setupWidget(Mojo.Menu.appMenu, Mojo.Controller.stageController.appMenuAttributes, Mojo.Controller.stageController.appMenuModel);
 }
 
-MainAssistant.prototype.timeTapped = function(event) {
-	var timePicked = event.srcElement.id.replace("TimeLabel", "");
-	this.controller.get("drawer" + timePicked).mojo.toggleState();
-}
-
 MainAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	example, key handlers that are observing the document */
-	this.SetToggleState("att-toggle-Morn", this.appSettingsCurrent["MornEnabled"]);
-	this.SetToggleState("att-toggle-Eve", this.appSettingsCurrent["EveEnabled"]);
-	this.SetToggleState("att-toggle-Nite", this.appSettingsCurrent["NiteEnabled"]);
+	Mojo.Additions.SetToggleState("att-toggle-Morn", this.appSettingsCurrent["MornEnabled"]);
+	Mojo.Additions.SetToggleState("att-toggle-Eve", this.appSettingsCurrent["EveEnabled"]);
+	Mojo.Additions.SetToggleState("att-toggle-Nite", this.appSettingsCurrent["NiteEnabled"]);
 }
 
 MainAssistant.prototype.setupTimePicker = function (hiddenDivName, settings) {
@@ -128,16 +147,26 @@ MainAssistant.prototype.setupTimePicker = function (hiddenDivName, settings) {
 	Mojo.Event.listen(this.controller.get("btn" + hiddenDivName), Mojo.Event.tap, this.timeSaved);
 }
 
+MainAssistant.prototype.timeTapped = function(event) {
+	var timePicked = event.srcElement.id.replace("TimeLabel", "");
+	this.controller.get("drawer" + timePicked).mojo.toggleState();
+}
+
 MainAssistant.prototype.timeSaved = function (event)
 {
-	var findButton = this.findAncestorWithIdPart(event.srcElement, "btn", 0, 12);
+	var findButton = Mojo.Additions.FindAncestorWithIdPart(event.srcElement, "btn", 0, 12);
 	var findSettingName = findButton.id.replace("btn", "");
 	var thisWidgetSetup = this.controller.getWidgetSetup("timePicker" + findSettingName);
-	var setTime = thisWidgetSetup.model.time;
+	var setTime = thisWidgetSetup.model.time.getHours() + ":" + thisWidgetSetup.model.time.getMinutes();
+	setTime = baseDateString + setTime;
+
 	this.appSettingsCurrent[findSettingName + "Start"] = setTime;
+	this.saveSettings();
 	this.updateTimeLabel(findSettingName, this.appSettingsCurrent[findSettingName + "Start"]);
+	
+	Mojo.Log.info("**** Settings when time saved: " + JSON.stringify(this.appSettingsCurrent));
 	this.controller.get("drawer" + findSettingName).mojo.toggleState();
-	Mojo.Controller.getAppController().showBanner("Setting timer...", {source: 'notification'});
+	Mojo.Controller.stageController.manageAlarm(findSettingName, this.appSettingsCurrent[findSettingName + "Start"], this.appSettingsCurrent[findSettingName + "Enabled"]);
 }
 
 MainAssistant.prototype.updateTimeLabel = function (timeName, timeToUse)
@@ -158,31 +187,6 @@ MainAssistant.prototype.updateTimeLabel = function (timeName, timeToUse)
 		displayTime += " pm";
 
 	document.getElementById(timeName + "TimeLabel").innerHTML = displayTime;
-}
-
-MainAssistant.prototype.findAncestorWithIdPart = function (currElement, namePartToSearch, expectedIndex, levelsToClimb)
-{
-	var parentList = "";
-	var foundElement;
-	for (var i=0;i<levelsToClimb;i++)
-	{
-		var parentElement = currElement.parentElement;
-		if (parentElement != null && parentElement.id != null && parentElement.id != "")
-		{
-			parentList += parentElement.id + ",";
-			if (parentElement.id.indexOf(namePartToSearch) == expectedIndex)
-			{
-				foundElement = parentElement;
-			}
-		}
-		else
-		{
-			parentList += "null,";
-		}
-		currElement = parentElement;
-	}
-	Mojo.Log.info("Discovered ancestor ids: " + parentList);
-	return foundElement;
 }
 
 MainAssistant.prototype.setupSlider = function (sliderName, settings)
@@ -207,8 +211,10 @@ MainAssistant.prototype.sliderChanged = function(event){
 	var updateLabel = document.getElementById(event.srcElement.id + "Label");
 	updateLabel.innerHTML = updateLabel.title + ": " + event.value + "%";
 	var settingName = event.srcElement.id.replace("sld", "");
-	Mojo.Log.info("change setting " + settingName + " to " + event.value);
+
 	this.appSettingsCurrent[settingName] = event.value;
+	this.saveSettings();
+	Mojo.Log.info("**** Settings after slider changed: " + JSON.stringify(this.appSettingsCurrent));
 }
 
 MainAssistant.prototype.setupToggle = function (toggleName, settings)
@@ -234,53 +240,27 @@ MainAssistant.prototype.setupToggle = function (toggleName, settings)
 }
 
 MainAssistant.prototype.togglePressed = function(event){
-	var settingName = event.srcElement.id.replace("att-toggle-", "");
-	settingName = settingName + "Enabled";
-	Mojo.Log.info("change setting " + settingName + " to " + event.value);
-	this.appSettingsCurrent[settingName] = event.value;
+	var findSettingName = event.srcElement.id.replace("att-toggle-", "");
+	findSettingName = findSettingName;
+
+	this.appSettingsCurrent[findSettingName + "Enabled"] = event.value.toString();
+	this.saveSettings();
+	Mojo.Log.info("**** Settings when toggle pressed: " + JSON.stringify(this.appSettingsCurrent));
+
+	Mojo.Controller.stageController.manageAlarm(findSettingName, this.appSettingsCurrent[findSettingName + "Start"], this.appSettingsCurrent[findSettingName + "Enabled"]);
 }
 
-MainAssistant.prototype.SetToggleState = function(widgetName, newvalue)
+MainAssistant.prototype.saveSettings = function ()
 {
-	var thisWidgetSetup = this.controller.getWidgetSetup(widgetName);
-	var thisWidgetModel = thisWidgetSetup.model;
-	thisWidgetModel.value = newvalue;
-	this.controller.setWidgetModel(widgetName, thisWidgetModel);
-
-	//There appears to be a bug in Mojo that means a toggle button doesn't reflect its model state during instantiation
-	//	This work-around fixes it.
-	var children = document.getElementById(widgetName).querySelectorAll('*');
-	for (var i=0; i<children.length; i++) {
-		if (children[i].className.indexOf("toggle-button") != -1)
-		{
-			children[i].className = "toggle-button " + thisWidgetModel.value;
-		}
-		if (children[i].tagName == "SPAN")
-		{
-			if (thisWidgetModel.value.toString().toLowerCase() == "true")
-				children[i].innerHTML = "on";
-			else
-				children[i].innerHTML = "off";
-		}
-	}
-}
-
-// This function will popup a dialog, displaying the message passed in.
-MainAssistant.prototype.showDialogBox = function(title, message){
-	this.controller.showAlertDialog({
-	onChoose: function(value) {},
-	title:title,
-	message:message,
-	choices:[ {label:'OK', value:'OK', type:'color'} ]
-});
+	var settingsCookie = new Mojo.Model.Cookie("settings");
+	settingsCookie.put(this.appSettingsCurrent);
 }
 
 MainAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	this scene is popped or another scene is pushed on top */
-	Mojo.Log.info("settings were: " + JSON.stringify(this.appSettingsCurrent));
-	var settingsCookie = new Mojo.Model.Cookie("settings");
-	settingsCookie.put(this.appSettingsCurrent);
+	Mojo.Log.info("** Saved Settings: " + JSON.stringify(this.appSettingsCurrent));
+	this.saveSettings();
 }
 
 MainAssistant.prototype.cleanup = function(event) {
