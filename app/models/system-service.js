@@ -2,10 +2,11 @@ var SystemService = function() {
 
 };
 
+//Create a named System Alarm using an absolute time
 SystemService.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 {
 	var success = true;
-    Mojo.Log.info("setting absolute alarm time: " + alarmTime);
+    Mojo.Log.error("Setting absolute alarm time: " + alarmTime);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
 		parameters: {
@@ -19,12 +20,11 @@ SystemService.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 			}
 		},
 		onSuccess: function(response) {
-			Mojo.Log.info("Alarm Set Success", JSON.stringify(response));
-			//News.wakeupTaskId = Object.toJSON(response.taskId);
+			Mojo.Log.error("Alarm Set Success", JSON.stringify(response));
 			success = true;
 		},
 		onFailure: function(response) {
-			Mojo.Log.info("Alarm Set Failure",
+			Mojo.Log.error("Alarm Set Failure",
 				JSON.stringify(response), response.errorText);
 			success = false;
 		}
@@ -32,10 +32,11 @@ SystemService.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 	return success;
 }
 
+//Create a named System Alarm using a relative time
 SystemService.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 {
 	var success = true;
-    Mojo.Log.info("setting relative alarm time: " + alarmTime);
+    Mojo.Log.error("Setting relative alarm time: " + alarmTime);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
 		parameters: {
@@ -49,11 +50,11 @@ SystemService.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 			}
 		},
 		onSuccess: function(response) {
-			Mojo.Log.info("Alarm Set Success", JSON.stringify(response));
+			Mojo.Log.error("Alarm Set Success", JSON.stringify(response));
 			success = true;
 		},
 		onFailure: function(response) {
-			Mojo.Log.info("Alarm Set Failure",
+			Mojo.Log.error("Alarm Set Failure",
 				JSON.stringify(response), response.errorText);
 			success = false;
 		}
@@ -61,19 +62,20 @@ SystemService.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 	return success;
 }
 
+//Remove a named System alarm
 SystemService.prototype.ClearSystemAlarm = function(alarmName)
 {
 	var success = true;
-    Mojo.Log.info("Clearing alarm: " + alarmName);
+    Mojo.Log.error("Clearing alarm: " + alarmName);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "clear",
 		parameters: {"key": "com.palm.webos.nightmoves-" + alarmName},
 		onSuccess: function(response) {
-			Mojo.Log.info("Alarm Clear Success", JSON.stringify(response));
+			Mojo.Log.error("Alarm Clear Success", JSON.stringify(response));
 			success = true;
 		},
 		onFailure: function(response) {
-			Mojo.Log.info("Alarm Clear Failure",
+			Mojo.Log.error("Alarm Clear Failure",
 				JSON.stringify(response), response.errorText);
 			success = false;
 		}
@@ -81,6 +83,7 @@ SystemService.prototype.ClearSystemAlarm = function(alarmName)
 	return success;
 }
 
+//Set the System Volume to a given level
 SystemService.prototype.SetSystemVolume = function (newVolume)
 {
     this.service_identifier = 'palm://com.palm.audio/system';
@@ -93,6 +96,7 @@ SystemService.prototype.SetSystemVolume = function (newVolume)
     return request;
 }
 
+//Set the System Brightness to a given level
 SystemService.prototype.SetSystemBrightness = function (newBrightness)
 {
     this.service_identifier = 'palm://com.palm.display/control';

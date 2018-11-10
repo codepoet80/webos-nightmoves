@@ -31,21 +31,6 @@ Additions.DisableWidget = function(widgetName, disabledValue)
     this.controller.modelChanged(this.controller.get(widgetName));
 }
 
-Additions.EnumerateObject = function(objectToEnumerate)
-{
-    for (var key in objectToEnumerate) {
-        Mojo.Log.info("=== prop:" + key + ": " + objectToEnumerate[key]);
-        if (objectToEnumerate.hasOwnProperty(key)) {
-        var obj = objectToEnumerate[key];
-        for (var prop in obj) {
-                if (obj.hasOwnProperty(prop)) {
-                    Mojo.Log.info("...... sub: " + prop + " = " + obj[prop])
-                }
-            }
-        }
-    }
-}
-
 Additions.SetToggleState = function(widgetName, toggledValue)
 {
     var StageController = Mojo.Controller.getAppController().getActiveStageController();
@@ -101,9 +86,17 @@ Additions.FindAncestorWithIdPart = function (currElement, namePartToSearch, expe
     return foundElement;
 }
 
-function padZeroes(value)
+Additions.EnumerateObject = function(objectToEnumerate)
 {
-    if (Number(value) < 10)
-        value = "0" + value;
-    return value;
+    for (var key in objectToEnumerate) {
+        Mojo.Log.info("=== prop:" + key + ": " + objectToEnumerate[key]);
+        if (objectToEnumerate.hasOwnProperty(key)) {
+        var obj = objectToEnumerate[key];
+        for (var prop in obj) {
+                if (obj.hasOwnProperty(prop)) {
+                    Mojo.Log.info("...... sub: " + prop + " = " + obj[prop])
+                }
+            }
+        }
+    }
 }

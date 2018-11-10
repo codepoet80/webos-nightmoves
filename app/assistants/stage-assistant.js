@@ -7,9 +7,10 @@ StageAssistant.prototype.setup = function() {
 	//Load my mojo additions
 	Mojo.Additions = Additions;
 
-	//Bind local methods
+	//Bind local members
 	StageController = Mojo.Controller.stageController;
 	StageController.manageAlarm = this.manageAlarm;
+	StageController.resetSettings = this.resetSettings;
 	StageController.launchWithAlarm = this.launchWithAlarm;
 	
 	//Setup App Menu
@@ -57,6 +58,7 @@ StageAssistant.prototype.launchWithAlarm = function()
 	Mojo.Controller.getAppController().showBanner("Night Moves changed to " + showSettingName, {source: 'notification'});
 	
 	//Then we'll need to set the alarms again for next time, before we die
+	this.manageAlarm(settingName, appSettings[settingName + "Start"], appSettings[settingName + "Enabled"]);
 }
 
 StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnabled)
@@ -85,45 +87,47 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 		{
 			if (today.getHours() < alarm.getHours() || (today.getHours() == alarm.getHours() && today.getMinutes()+1 < alarm.getMinutes()))
 			{
-				Mojo.Log.error("### Next alarm time is today.");
+				Mojo.Log.info("### Next alarm time is today.");
 				var relativeTime = (alarm.getTime() - today.getTime());
+				Mojo.Log.info("### Relative time delta is: " + relativeTime);
+				//Find the hours
 				var hours = Math.floor(relativeTime / 3600000);
 				if (hours < 10)
 					hours = "0" + hours;
+				//Found the hours, so discard them and find the remaining minutes
+				relativeTime = (relativeTime - hours * 3600000);
 				var minutes = Math.floor(relativeTime / 60000);
 				if (minutes < 10)
 					minutes = "0" + minutes;
 				relativeTime = hours + ":" + minutes + ":00:00";
 
-				Mojo.Log.info("### Relative alarm time should be " + relativeTime);
+				Mojo.Log.info("### Relative alarm time should be: " + relativeTime);
 				success = systemService.SetSystemAlarmRelative(alarmName, relativeTime);
-				Mojo.Log.error("### Alarm time requested in minutes: " + relativeTime);
+				if (!success)
+				{
+					Mojo.showAlertDialog("Error", "An alarm could not be set");
+				}
 			}
 			else
 			{
-				Mojo.Log.error("### Next alarm time is tomorrow.");
+				Mojo.Log.info("### Next alarm time is tomorrow.");
 				alarmTime.setDate(alarmTime.getDate() + 1);
 				Mojo.Log.info("### Alarm time requested was: " + alarmTime);
 				var timeToUse = constructUTCAlarm(alarmTime, appModel.Debug);
-				Mojo.Log.error("### Alarm time requested is: " + timeToUse);
+				Mojo.Log.info("### Alarm time requested is: " + timeToUse);
 				success = systemService.SetSystemAlarmAbsolute(alarmName, timeToUse);
+				if (!success)
+				{
+					Mojo.showAlertDialog("Error", "An alarm could not be set");
+				}
 			}
 		}
 	}
 	else
 	{
-		Mojo.Log.info("### Requesting the clearing of alarm " + alarmName);
 		success = systemService.ClearSystemAlarm(alarmName);
 	}
 	return success;
-}
-
-constructUTCAlarm = function(useTime)
-{
-    var providedDate = new Date(useTime);
-    var utcString = padZeroes(providedDate.getUTCMonth()+1) + "/" + padZeroes(providedDate.getDate()) + "/" + padZeroes(providedDate.getUTCFullYear());
-    utcString += " " + padZeroes(providedDate.getHours()) + ":" + padZeroes(providedDate.getUTCMinutes()) + ":" + padZeroes(providedDate.getUTCSeconds());
-    return utcString;
 }
 
 StageAssistant.prototype.handleCommand = function(event) {
@@ -143,24 +147,40 @@ StageAssistant.prototype.handleCommand = function(event) {
 				this.controller.showAlertDialog({
 					onChoose: function(value) {},
 					title: $L("Night Moves"),
-					message: $L("Copyright 2018, Jonathan Wise. Available under an MIT License. Source code available at: https://github.com/codepoet80/webos-stopwatch"),
+					message: $L("Copyright 2018, Jonathan Wise. Available under an MIT License. Source code available at: https://github.com/codepoet80/webos-nightmoves"),
 					choices:[
 						{label:$L("OK"), value:""}
 					]
 				});
 				break;
 			case 'do-resetSettings':
-				var settingsCookie = new Mojo.Model.Cookie("settings");
-				appSettings = settingsCookie.put(null);
-				this.controller.showAlertDialog({
-					onChoose: function(value) {},
-					title: $L("Night Moves"),
-					message: $L("Preferences storage has been cleared."),
-					choices:[
-						{label:$L("OK"), value:""}
-					]
-				});
+				this.resetSettings();
 				break;
 		}
 	}
 }; 
+
+StageAssistant.prototype.resetSettings = function()
+{
+	//Tell main scene to drop settings
+	appModel.DoReset = true;
+	//Restart main scene
+	StageController = Mojo.Controller.stageController;
+	StageController.popScene('main');
+	StageController.pushScene('main');
+}
+
+constructUTCAlarm = function(useTime)
+{
+    var providedDate = new Date(useTime);
+    var utcString = padZeroes(providedDate.getUTCMonth()+1) + "/" + padZeroes(providedDate.getDate()) + "/" + padZeroes(providedDate.getUTCFullYear());
+    utcString += " " + padZeroes(providedDate.getHours()) + ":" + padZeroes(providedDate.getUTCMinutes()) + ":" + padZeroes(providedDate.getUTCSeconds());
+    return utcString;
+}
+
+padZeroes = function (value)
+{
+    if (Number(value) < 10)
+        value = "0" + value;
+    return value;
+}

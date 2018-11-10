@@ -1,6 +1,7 @@
 function MainAssistant() {
 	
 }
+
 var appSettingsCurrent;
 var baseDateString = "August 25, 2001 ";
 var appSettingsDefaults = {
@@ -26,6 +27,14 @@ MainAssistant.prototype.loadSettings = function () {
 		appSettings = settingsCookie.get();
 		if (typeof appSettings === "undefined" || appSettings == null || !this.checkSettingsValid(appSettings)) {
 			Mojo.Log.info("** Using first run default settings");
+			this.controller.showAlertDialog({
+				onChoose: function(value) {},
+				title: $L("Welcome to Night Moves!"),
+				message: $L("With this app, you can configure the settings you want your webOS device to be set to at different times in the day. Default settings have been loaded to get things started."),
+				choices:[
+					{label:$L("OK"), value:""}
+				]
+			});
 			var appSettings = appSettingsDefaults;
 		}
 		else
@@ -149,6 +158,7 @@ MainAssistant.prototype.setupTimePicker = function (hiddenDivName, settings) {
 
 MainAssistant.prototype.timeTapped = function(event) {
 	var timePicked = event.srcElement.id.replace("TimeLabel", "");
+	timePicked = timePicked.replace("TimeTD", "");
 	this.controller.get("drawer" + timePicked).mojo.toggleState();
 }
 
@@ -235,6 +245,7 @@ MainAssistant.prototype.setupToggle = function (toggleName, settings)
 	this.togglePressed = this.togglePressed.bind(this);
 	Mojo.Event.listen(this.controller.get('att-toggle-' + toggleName), Mojo.Event.propertyChange, this.togglePressed);
 	var labelName = toggleName + "TimeLabel";
+	var tdName = toggleName + "TimeTD";
 	this.updateTimeLabel(toggleName, settings[toggleName + "Start"]);
 	Mojo.Event.listen(this.controller.get(labelName), Mojo.Event.tap, this.timeTapped);
 }
@@ -259,6 +270,16 @@ MainAssistant.prototype.saveSettings = function ()
 MainAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	this scene is popped or another scene is pushed on top */
+	if (appModel.DoReset)
+	{
+		Mojo.Log.info("Settings are being reset!");
+		//Remove alarms
+		Mojo.Controller.stageController.manageAlarm("Morn", null, false);
+		Mojo.Controller.stageController.manageAlarm("Eve", null, false);
+		Mojo.Controller.stageController.manageAlarm("Nite", null, false);
+		//Clear out settings
+		this.appSettingsCurrent = null;
+	}
 	Mojo.Log.info("** Saved Settings: " + JSON.stringify(this.appSettingsCurrent));
 	this.saveSettings();
 }
