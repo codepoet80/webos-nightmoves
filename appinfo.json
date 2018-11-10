@@ -1,6 +1,6 @@
 {
 	"id": "com.palm.webos.nightmoves",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"vendor": "Jonathan Wise",
 	"type": "web",
 	"main": "index.html",

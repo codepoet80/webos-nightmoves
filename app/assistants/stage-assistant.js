@@ -48,36 +48,40 @@ StageAssistant.prototype.launchWithAlarm = function()
 	systemService.SetSystemBrightness(appSettings[settingName + "Bright"]);
 	
 	//Read and set volume
-	Mojo.Log.info("Setting - Volume is: " + appSettings[settingName + "Volume"]);
+	Mojo.Log.info("Setting - System Volume is: " + appSettings[settingName + "Volume"]);
 	systemService.SetSystemVolume(appSettings[settingName + "Volume"]);
+	Mojo.Log.info("Setting - Ringtone Volume is: " + appSettings[settingName + "Volume"]);
+	systemService.SetRingtoneVolume(appSettings[settingName + "Volume"]);
 
 	//Tell user what happened
 	var showSettingName;
 	if (settingName == "Morn") { showSettingName = "morning"; };
 	if (settingName == "Eve") { showSettingName = "evening"; };
 	if (settingName == "Nite") { showSettingName = "night"; };
-	Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
+	setTimeout(function(showSettingName) {
+		Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
+	}, 2000);
 	
-	//Then we'll need to set the alarm again for next time, before we die
-	this.manageAllAlarms(appSettings);
+	//Then we'll need to set the alarms again for next time, before we die
+	this.manageAllAlarms(appSettings, settingName);
 }
 
-StageAssistant.prototype.manageAllAlarms = function(appSettings)
+StageAssistant.prototype.manageAllAlarms = function(appSettings, currentAlarmName)
 {
 	Mojo.Log.info("Night Moves is re-establishing all alarms.");
-	
+
 	this.manageAlarm("Morn", null, false);
 	if (appSettings["MornEnabled"])
-	    this.manageAlarm("Morn", appSettings["MornStart"], appSettings["MornEnabled"]);
+	    this.manageAlarm("Morn", appSettings["MornStart"], appSettings["MornEnabled"], currentAlarmName);
 	this.manageAlarm("Eve", null, false);
 	if (appSettings["EveEnabled"])
-	    this.manageAlarm("Eve", appSettings["EveStart"], appSettings["EveEnabled"]);
+	    this.manageAlarm("Eve", appSettings["EveStart"], appSettings["EveEnabled"], currentAlarmName);
 	this.manageAlarm("Nite", null, false);
 	if (appSettings["NiteEnabled"])
-	    this.manageAlarm("Nite", appSettings["NiteStart"], appSettings["NiteEnabled"]);	
+	    this.manageAlarm("Nite", appSettings["NiteStart"], appSettings["NiteEnabled"], currentAlarmName);	
 }
 
-StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnabled)
+StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnabled, forceAbsolute)
 {
 	var alarmSetResult = false;
 	if (alarmEnabled == "true" || alarmEnabled == true)
@@ -95,13 +99,36 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 
 		if (appModel.Debug)	//Fire quickly
 		{
-			Mojo.Log.info("### Alarm debug is on, over-riding alarm time.");
+			Mojo.Log.error("### Alarm debug is on, over-riding alarm time.");
 			//Seconds
 			systemService.SetSystemAlarmRelative(alarmName, "00:00:05:00");
 		}
 		else	//Fire on scheduled date time
 		{
-			if (today.getHours() < alarm.getHours() || (today.getHours() == alarm.getHours() && today.getMinutes()+1 < alarm.getMinutes()))
+			//Determine if we can use a relative alarm
+			var useAbsolute = false;
+			if (alarmName == forceAbsolute)
+			{
+				Mojo.Log.info("Forcing absolute for alarm by name " + alarmName );
+				useAbsolute = true;
+			}
+			if (forceAbsolute == true)
+			{
+				Mojo.Log.info("Forcing absolute for alarm by boolean " + alarmName );
+				useAbsolute = true;
+			}
+			if (today.getHours() > alarm.getHours())
+			{
+				Mojo.Log.info("Set absolute for alarm where hours are earlier in the day " + alarmName);
+				useAbsolute = true;
+			}
+			if (today.getHours() == alarm.getHours() && today.getMinutes() >= alarm.getMinutes()-1)
+			{
+				Mojo.Log.info("Set absolute for alarm where hours and minutes are earlier in the day " + alarmName);
+				useAbsolute = true;
+			}
+
+			if (!useAbsolute)
 			{
 				Mojo.Log.info("### Next alarm time is today.");
 				var relativeTime = (alarm.getTime() - today.getTime());
@@ -143,7 +170,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 				}
 				else
 				{
-					alarmSetResult = "Next trigger: " + timeToUse;
+					alarmSetResult = "Next trigger: " + timeToUse + ".";
 				}
 			}
 		}

@@ -90,8 +90,21 @@ SystemService.prototype.SetSystemVolume = function (newVolume)
     var request = new Mojo.Service.Request(this.service_identifier, {
         method: 'setVolume',
         parameters: {volume: newVolume },
-        onSuccess: function(response) { Mojo.Log.error("volume set!" ); },
-        onFailure: function(response) { Mojo.Log.error("volume not set!", JSON.stringify(response)); }		
+        onSuccess: function(response) { Mojo.Log.error("System volume set to " + newVolume ); },
+        onFailure: function(response) { Mojo.Log.error("System volume not set!", JSON.stringify(response)); }		
+    });
+    return request;
+}
+
+//Set the Ringtone Volume to a given level
+SystemService.prototype.SetRingtoneVolume = function (newVolume)
+{
+    this.service_identifier = 'palm://com.palm.audio/ringtone';
+    var request = new Mojo.Service.Request(this.service_identifier, {
+        method: 'setVolume',
+        parameters: {volume: newVolume },
+        onSuccess: function(response) { Mojo.Log.error("Ringtone volume set to " + newVolume); },
+        onFailure: function(response) { Mojo.Log.error("Ringtone volume not set!", JSON.stringify(response)); }		
     });
     return request;
 }
@@ -103,8 +116,8 @@ SystemService.prototype.SetSystemBrightness = function (newBrightness)
     var request = new Mojo.Service.Request(this.service_identifier, {
         method: 'setProperty',
         parameters:{maximumBrightness: newBrightness},
-        onSuccess: function(response) { Mojo.Log.error("brightness set!" ); },
-        onFailure: function(response) { Mojo.Log.error("brightess not set!", JSON.stringify(response)); }
+        onSuccess: function(response) { Mojo.Log.error("Screen brightness set! to " + newBrightness); },
+        onFailure: function(response) { Mojo.Log.error("Screen brightess not set!", JSON.stringify(response)); }
     });
     return request;
 }
