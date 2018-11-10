@@ -187,8 +187,12 @@ MainAssistant.prototype.updateTimeLabel = function (timeName, timeToUse)
 {
 	var myTime = new Date(timeToUse);
 	var displayTime = "Start at ";
+	//This should be based on regional settings
+	//	Currently forcing US settings with this logic
 	if (myTime.getHours() > 12)
 		displayTime += myTime.getHours() - 12;
+	else if (myTime.getHours() == 0)
+		displayTime += "12";
 	else
 		displayTime += myTime.getHours();
 	displayTime += ":";
@@ -262,7 +266,14 @@ MainAssistant.prototype.togglePressed = function(event){
 	this.saveSettings();
 	Mojo.Log.info("**** Settings when toggle pressed: " + JSON.stringify(this.appSettingsCurrent));
 
-	Mojo.Controller.stageController.manageAlarm(findSettingName, this.appSettingsCurrent[findSettingName + "Start"], this.appSettingsCurrent[findSettingName + "Enabled"]);
+	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, this.appSettingsCurrent[findSettingName + "Start"], this.appSettingsCurrent[findSettingName + "Enabled"]);
+	if (newTime != false)
+	{
+		if (newTime != true)
+		{
+			Mojo.Controller.getAppController().showBanner(newTime, {source: 'notification'});
+		}
+	}
 }
 
 MainAssistant.prototype.saveSettings = function ()

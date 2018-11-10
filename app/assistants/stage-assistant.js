@@ -56,7 +56,7 @@ StageAssistant.prototype.launchWithAlarm = function()
 	if (settingName == "Morn") { showSettingName = "morning"; };
 	if (settingName == "Eve") { showSettingName = "evening"; };
 	if (settingName == "Nite") { showSettingName = "night"; };
-	Mojo.Controller.getAppController().showBanner("Night Moves changed to " + showSettingName, {source: 'notification'});
+	Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
 	
 	//Then we'll need to set the alarm again for next time, before we die
 	this.manageAllAlarms(appSettings);
@@ -79,7 +79,7 @@ StageAssistant.prototype.manageAllAlarms = function(appSettings)
 
 StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnabled)
 {
-	var success = true;
+	var alarmSetResult = false;
 	if (alarmEnabled == "true" || alarmEnabled == true)
 	{
 		var today = new Date();
@@ -121,7 +121,12 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 				success = systemService.SetSystemAlarmRelative(alarmName, relativeTime);
 				if (!success)
 				{
-					Mojo.showAlertDialog("Error", "An alarm could not be set");
+					Mojo.showAlertDialog("Error", "A relative alarm could not be set.");
+				}
+				else
+				{
+					var showTime = relativeTime.substring(0,5);
+					alarmSetResult = "Next trigger: " + showTime + " from now.";
 				}
 			}
 			else
@@ -134,7 +139,11 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 				success = systemService.SetSystemAlarmAbsolute(alarmName, timeToUse);
 				if (!success)
 				{
-					Mojo.showAlertDialog("Error", "An alarm could not be set");
+					Mojo.showAlertDialog("Error", "An absolute alarm could not be set");
+				}
+				else
+				{
+					alarmSetResult = "Next trigger: " + timeToUse;
 				}
 			}
 		}
@@ -143,7 +152,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 	{
 		success = systemService.ClearSystemAlarm(alarmName);
 	}
-	return success;
+	return alarmSetResult;
 }
 
 StageAssistant.prototype.handleCommand = function(event) {
