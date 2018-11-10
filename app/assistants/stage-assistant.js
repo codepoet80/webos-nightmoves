@@ -24,6 +24,7 @@ StageAssistant.prototype.setup = function() {
 
 StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnabled)
 {
+	var success = true;
 	if (alarmEnabled == "true" || alarmEnabled == true)
 	{
 		var today = new Date();
@@ -58,7 +59,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 				relativeTime = hours + ":" + minutes + ":00:00";
 
 				Mojo.Log.info("### Relative alarm time should be " + relativeTime);
-				SystemService.SetSystemAlarmRelative(alarmName, relativeTime);
+				success = SystemService.SetSystemAlarmRelative(alarmName, relativeTime);
 				Mojo.Log.error("### Alarm time requested was in minutes: " + relativeTime);
 			}
 			else
@@ -68,15 +69,16 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 				Mojo.Log.info("### Alarm time requested was: " + alarmTime);
 				var timeToUse = constructUTCAlarm(alarmTime, debug);
 				Mojo.Log.error("### Alarm time requested is: " + timeToUse);
-				SystemService.SetSystemAlarmAbsolute(alarmName, timeToUse);
+				success = SystemService.SetSystemAlarmAbsolute(alarmName, timeToUse);
 			}			
 		}
 	}
 	else
 	{
 		Mojo.Log.info("### Requesting the clearing of alarm " + alarmName);
-		SystemService.ClearSystemAlarm(alarmName);
+		success = SystemService.ClearSystemAlarm(alarmName);
 	}
+	return success;
 }
 
 constructUTCAlarm = function(useTime)

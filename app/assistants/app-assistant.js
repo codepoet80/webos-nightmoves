@@ -28,8 +28,13 @@ AppAssistant.prototype.handleLaunch = function(params) {
 
         //Then we'll need to set the alarms again
         Mojo.Controller.getAppController().showBanner("Night Moves changed to " + showSettingName, {source: 'notification'});
-        StageController = Mojo.Controller.stageController;
-        StageController.manageAlarm(settingName, appSettings[settingName + "Start"], appSettings[settingName + "Enabled"]);
+        StageController = Mojo.Controller.getActiveStageController();
+		//var success = StageController.manageAlarm(settingName, appSettings[settingName + "Start"], appSettings[settingName + "Enabled"]);
+		//Mojo.Log.info("Alarm setting success: " + success);
+		
+		//StageController = Mojo.Controller.stageController;
+		this.controller=StageController.activeScene();
+		this.controller.window.close();
         //If something is wrong, load the main screen -- and show a dialog?
     }
     

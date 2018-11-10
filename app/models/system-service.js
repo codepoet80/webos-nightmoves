@@ -5,6 +5,7 @@ var SystemService = Class.create({
 
 SystemService.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 {
+	var success = true;
     Mojo.Log.info("setting absolute alarm time: " + alarmTime);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
@@ -21,18 +22,21 @@ SystemService.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 		onSuccess: function(response) {
 			Mojo.Log.info("Alarm Set Success", JSON.stringify(response));
 			//News.wakeupTaskId = Object.toJSON(response.taskId);
+			success = true;
 		},
 		onFailure: function(response) {
 			Mojo.Log.info("Alarm Set Failure",
 				JSON.stringify(response), response.errorText);
+			success = false;
 		}
 	});
+	return success;
 }
 
 SystemService.SetSystemAlarmRelative = function(alarmName, alarmTime)
 {
+	var success = true;
     Mojo.Log.info("setting relative alarm time: " + alarmTime);
-
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
 		parameters: {
@@ -47,28 +51,35 @@ SystemService.SetSystemAlarmRelative = function(alarmName, alarmTime)
 		},
 		onSuccess: function(response) {
 			Mojo.Log.info("Alarm Set Success", JSON.stringify(response));
+			success = true;
 		},
 		onFailure: function(response) {
 			Mojo.Log.info("Alarm Set Failure",
 				JSON.stringify(response), response.errorText);
+			success = false;
 		}
 	});
+	return success;
 }
 
 SystemService.ClearSystemAlarm = function(alarmName)
 {
+	var success = true;
     Mojo.Log.info("Clearing alarm: " + alarmName);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "clear",
 		parameters: {"key": "com.palm.webos.nightmoves-" + alarmName},
 		onSuccess: function(response) {
 			Mojo.Log.info("Alarm Clear Success", JSON.stringify(response));
+			success = true;
 		},
 		onFailure: function(response) {
 			Mojo.Log.info("Alarm Clear Failure",
 				JSON.stringify(response), response.errorText);
+			success = false;
 		}
 	});
+	return success;
 }
 
 SystemService.SetSystemVolume = function (newVolume)
