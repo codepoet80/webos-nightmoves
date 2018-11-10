@@ -31,7 +31,7 @@ Additions.DisableWidget = function(widgetName, disabledValue)
     this.controller.modelChanged(this.controller.get(widgetName));
 }
 
-Additions.EumerateObject = function(objectToEnumerate)
+Additions.EnumerateObject = function(objectToEnumerate)
 {
     for (var key in objectToEnumerate) {
         Mojo.Log.info("=== prop:" + key + ": " + objectToEnumerate[key]);

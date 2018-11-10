@@ -1,9 +1,8 @@
-var SystemService = Class.create({ 
-	initialize: function() { 
-	}
-});
+var SystemService = function() { 
 
-SystemService.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
+};
+
+SystemService.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 {
 	var success = true;
     Mojo.Log.info("setting absolute alarm time: " + alarmTime);
@@ -33,7 +32,7 @@ SystemService.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 	return success;
 }
 
-SystemService.SetSystemAlarmRelative = function(alarmName, alarmTime)
+SystemService.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 {
 	var success = true;
     Mojo.Log.info("setting relative alarm time: " + alarmTime);
@@ -62,7 +61,7 @@ SystemService.SetSystemAlarmRelative = function(alarmName, alarmTime)
 	return success;
 }
 
-SystemService.ClearSystemAlarm = function(alarmName)
+SystemService.prototype.ClearSystemAlarm = function(alarmName)
 {
 	var success = true;
     Mojo.Log.info("Clearing alarm: " + alarmName);
@@ -82,7 +81,7 @@ SystemService.ClearSystemAlarm = function(alarmName)
 	return success;
 }
 
-SystemService.SetSystemVolume = function (newVolume)
+SystemService.prototype.SetSystemVolume = function (newVolume)
 {
     this.service_identifier = 'palm://com.palm.audio/system';
     var request = new Mojo.Service.Request(this.service_identifier, {
@@ -94,7 +93,7 @@ SystemService.SetSystemVolume = function (newVolume)
     return request;
 }
 
-SystemService.SetSystemBrightness = function (newBrightness)
+SystemService.prototype.SetSystemBrightness = function (newBrightness)
 {
     this.service_identifier = 'palm://com.palm.display/control';
     var request = new Mojo.Service.Request(this.service_identifier, {

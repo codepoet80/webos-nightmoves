@@ -7,9 +7,12 @@ StageAssistant.prototype.setup = function() {
 	//Load my mojo additions
 	Mojo.Additions = Additions;
 
-	//Setup App Menu
+	//Bind local methods
 	StageController = Mojo.Controller.stageController;
 	StageController.manageAlarm = this.manageAlarm;
+	StageController.launchWithAlarm = this.launchWithAlarm;
+	
+	//Setup App Menu
 	StageController.appMenuAttributes = {omitDefaultItems: true};
 	StageController.appMenuModel = { label: "Settings",
 		items: [
@@ -18,8 +21,42 @@ StageAssistant.prototype.setup = function() {
 			{label: "About Night Moves", command: 'do-myAbout'}
 		]
 	};
+	
+	Mojo.Log.info("Nightmoves stage alarm launch: " + appModel.AlarmLaunch);
+	if (!appModel.AlarmLaunch)	//If its a normal launch, start a scene
+		this.controller.pushScene('main');
+	else	//If its an alarm re-launch, handle the alarm and close
+	{
+		this.launchWithAlarm();
+		StageController.window.close();
+	}
+}
 
-	this.controller.pushScene('main');
+StageAssistant.prototype.launchWithAlarm = function()
+{
+	Mojo.Log.info("Loadings settings for alarm: " + appModel.AlarmLaunchName);
+	var settingName = appModel.AlarmLaunchName;
+	var settingsCookie = new Mojo.Model.Cookie("settings");
+	var appSettings = settingsCookie.get();
+	
+	Mojo.Log.info("Setting - Enabled is: " + appSettings[settingName + "Enabled"]);
+
+	//Read and set brightness
+	Mojo.Log.info("Setting - Brightness is: " + appSettings[settingName + "Bright"]);
+	systemService.SetSystemBrightness(appSettings[settingName + "Bright"]);
+	
+	//Read and set volume
+	Mojo.Log.info("Setting - Volume is: " + appSettings[settingName + "Volume"]);
+	systemService.SetSystemVolume(appSettings[settingName + "Volume"]);
+
+	//Tell user what happened
+	var showSettingName;
+	if (settingName == "Morn") { showSettingName = "morning"; };
+	if (settingName == "Eve") { showSettingName = "evening"; };
+	if (settingName == "Nite") { showSettingName = "night"; };
+	Mojo.Controller.getAppController().showBanner("Night Moves changed to " + showSettingName, {source: 'notification'});
+	
+	//Then we'll need to set the alarms again for next time, before we die
 }
 
 StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnabled)
@@ -38,11 +75,11 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 		alarmTime = alarm;
 		Mojo.Log.info("### Alarm time changed to: " + alarmTime);
 
-		if (debug)	//Fire quickly
+		if (appModel.Debug)	//Fire quickly
 		{
 			Mojo.Log.info("### Alarm debug is on, over-riding alarm time.");
 			//Seconds
-			SystemService.SetSystemAlarmRelative(alarmName, "00:00:05:00");
+			systemService.SetSystemAlarmRelative(alarmName, "00:00:05:00");
 		}
 		else	//Fire on scheduled date time
 		{
@@ -59,24 +96,24 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 				relativeTime = hours + ":" + minutes + ":00:00";
 
 				Mojo.Log.info("### Relative alarm time should be " + relativeTime);
-				success = SystemService.SetSystemAlarmRelative(alarmName, relativeTime);
-				Mojo.Log.error("### Alarm time requested was in minutes: " + relativeTime);
+				success = systemService.SetSystemAlarmRelative(alarmName, relativeTime);
+				Mojo.Log.error("### Alarm time requested in minutes: " + relativeTime);
 			}
 			else
 			{
 				Mojo.Log.error("### Next alarm time is tomorrow.");
 				alarmTime.setDate(alarmTime.getDate() + 1);
 				Mojo.Log.info("### Alarm time requested was: " + alarmTime);
-				var timeToUse = constructUTCAlarm(alarmTime, debug);
+				var timeToUse = constructUTCAlarm(alarmTime, appModel.Debug);
 				Mojo.Log.error("### Alarm time requested is: " + timeToUse);
-				success = SystemService.SetSystemAlarmAbsolute(alarmName, timeToUse);
-			}			
+				success = systemService.SetSystemAlarmAbsolute(alarmName, timeToUse);
+			}
 		}
 	}
 	else
 	{
 		Mojo.Log.info("### Requesting the clearing of alarm " + alarmName);
-		success = SystemService.ClearSystemAlarm(alarmName);
+		success = systemService.ClearSystemAlarm(alarmName);
 	}
 	return success;
 }
@@ -96,11 +133,11 @@ StageAssistant.prototype.handleCommand = function(event) {
 	if(event.type == Mojo.Event.command) {
 		switch(event.command) {
 			case 'do-toggleDebug':
-				if (debug == true)
-					debug = false;
+				if (appModel.Debug == true)
+					appModel.Debug = false;
 				else
-					debug = true;
-				Mojo.Controller.getAppController().showBanner("Debug mode " + debug, {source: 'notification'});
+					appModel.Debug = true;
+				Mojo.Controller.getAppController().showBanner("Debug mode " + appModel.Debug, {source: 'notification'});
 				break;
 			case 'do-myAbout':
 				this.controller.showAlertDialog({
@@ -126,4 +163,4 @@ StageAssistant.prototype.handleCommand = function(event) {
 				break;
 		}
 	}
-  }; 
+}; 
