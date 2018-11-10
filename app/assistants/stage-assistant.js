@@ -59,7 +59,7 @@ StageAssistant.prototype.launchWithAlarm = function()
 	Mojo.Controller.getAppController().showBanner("Night Moves changed to " + showSettingName, {source: 'notification'});
 	
 	//Then we'll need to set the alarm again for next time, before we die
-	this.manageAllAlarms();
+	this.manageAllAlarms(appSettings);
 }
 
 StageAssistant.prototype.manageAllAlarms = function(appSettings)
