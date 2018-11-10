@@ -10,6 +10,7 @@ StageAssistant.prototype.setup = function() {
 	//Bind local members
 	StageController = Mojo.Controller.stageController;
 	StageController.manageAlarm = this.manageAlarm;
+	StageController.manageAllAlarms = this.manageAllAlarms;
 	StageController.resetSettings = this.resetSettings;
 	StageController.launchWithAlarm = this.launchWithAlarm;
 	
@@ -57,8 +58,23 @@ StageAssistant.prototype.launchWithAlarm = function()
 	if (settingName == "Nite") { showSettingName = "night"; };
 	Mojo.Controller.getAppController().showBanner("Night Moves changed to " + showSettingName, {source: 'notification'});
 	
-	//Then we'll need to set the alarms again for next time, before we die
-	this.manageAlarm(settingName, appSettings[settingName + "Start"], appSettings[settingName + "Enabled"]);
+	//Then we'll need to set the alarm again for next time, before we die
+	this.manageAllAlarms();
+}
+
+StageAssistant.prototype.manageAllAlarms = function(appSettings)
+{
+	Mojo.Log.info("Night Moves is re-establishing all alarms.");
+	
+	this.manageAlarm("Morn", null, false);
+	if (appSettings["MornEnabled"])
+	    this.manageAlarm("Morn", appSettings["MornStart"], appSettings["MornEnabled"]);
+	this.manageAlarm("Eve", null, false);
+	if (appSettings["EveEnabled"])
+	    this.manageAlarm("Eve", appSettings["EveStart"], appSettings["EveEnabled"]);
+	this.manageAlarm("Nite", null, false);
+	if (appSettings["NiteEnabled"])
+	    this.manageAlarm("Nite", appSettings["NiteStart"], appSettings["NiteEnabled"]);	
 }
 
 StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnabled)

@@ -88,6 +88,7 @@ MainAssistant.prototype.setup = function(){
 
 	this.appSettingsCurrent = this.loadSettings();
 	Mojo.Log.info("** Loaded Settings: " + JSON.stringify(this.appSettingsCurrent));
+	appModel.DoReset = false;
 	
 	//Setup toggles
 	this.timeTapped = this.timeTapped.bind(this);
@@ -120,6 +121,9 @@ MainAssistant.prototype.activate = function(event) {
 	Mojo.Additions.SetToggleState("att-toggle-Morn", this.appSettingsCurrent["MornEnabled"]);
 	Mojo.Additions.SetToggleState("att-toggle-Eve", this.appSettingsCurrent["EveEnabled"]);
 	Mojo.Additions.SetToggleState("att-toggle-Nite", this.appSettingsCurrent["NiteEnabled"]);
+
+	//With each launch, we're going to re-establish alarms, in order to "self-heal"
+	Mojo.Controller.stageController.manageAllAlarms(this.appSettingsCurrent);
 }
 
 MainAssistant.prototype.setupTimePicker = function (hiddenDivName, settings) {
@@ -270,15 +274,16 @@ MainAssistant.prototype.saveSettings = function ()
 MainAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	this scene is popped or another scene is pushed on top */
+	Mojo.Log.info("Night moves is being deactivated.");
 	if (appModel.DoReset)
 	{
-		Mojo.Log.info("Settings are being reset!");
-		//Remove alarms
-		Mojo.Controller.stageController.manageAlarm("Morn", null, false);
-		Mojo.Controller.stageController.manageAlarm("Eve", null, false);
-		Mojo.Controller.stageController.manageAlarm("Nite", null, false);
+		Mojo.Log.info("Settings are being reset.");
 		//Clear out settings
 		this.appSettingsCurrent = null;
+	}
+	else
+	{
+		Mojo.Log.info("Settings are being saved.");
 	}
 	Mojo.Log.info("** Saved Settings: " + JSON.stringify(this.appSettingsCurrent));
 	this.saveSettings();
