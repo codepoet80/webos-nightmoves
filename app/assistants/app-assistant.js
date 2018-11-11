@@ -14,6 +14,11 @@ AppAssistant.prototype.handleLaunch = function(params) {
 	{	
 		Mojo.Log.info("This is a normal launch");
 		appModel.AlarmLaunch = false;
+		var mainStage = this.controller.getStageProxy("");
+		if (mainStage) {
+			var stageController = this.controller.getStageController("");
+			stageController.window.focus();	
+		} 
 		return;
 	}
     else	//If parameters were passed, this is a launch from a system alarm

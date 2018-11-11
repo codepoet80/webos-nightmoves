@@ -58,9 +58,8 @@ StageAssistant.prototype.launchWithAlarm = function()
 	if (settingName == "Morn") { showSettingName = "morning"; };
 	if (settingName == "Eve") { showSettingName = "evening"; };
 	if (settingName == "Nite") { showSettingName = "night"; };
-	setTimeout(function(showSettingName) {
-		Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
-	}, 2000);
+	//TODO: This gets hidden by the ringer icon on my Pre3.
+	Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
 	
 	//Then we'll need to set the alarms again for next time, before we die
 	this.manageAllAlarms(appSettings, settingName);

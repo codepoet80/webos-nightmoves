@@ -180,7 +180,14 @@ MainAssistant.prototype.timeSaved = function (event)
 	
 	Mojo.Log.info("**** Settings when time saved: " + JSON.stringify(this.appSettingsCurrent));
 	this.controller.get("drawer" + findSettingName).mojo.toggleState();
-	Mojo.Controller.stageController.manageAlarm(findSettingName, this.appSettingsCurrent[findSettingName + "Start"], this.appSettingsCurrent[findSettingName + "Enabled"]);
+	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, this.appSettingsCurrent[findSettingName + "Start"], this.appSettingsCurrent[findSettingName + "Enabled"]);
+	if (newTime != false)
+	{
+		if (newTime != true)
+		{
+			Mojo.Controller.getAppController().showBanner(newTime, {source: 'notification'});
+		}
+	}
 }
 
 MainAssistant.prototype.updateTimeLabel = function (timeName, timeToUse)
