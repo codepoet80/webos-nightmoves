@@ -36,11 +36,16 @@ StageAssistant.prototype.setup = function() {
 
 StageAssistant.prototype.launchWithAlarm = function()
 {
+	//Try to wake up the screen
+	Mojo.Controller.stageController.setWindowProperties({
+		blockScreenTimeout: true
+	});
+
+	//Load settings for the alarm that woke us up
 	Mojo.Log.info("Loadings settings for alarm: " + appModel.AlarmLaunchName);
 	var settingName = appModel.AlarmLaunchName;
 	var settingsCookie = new Mojo.Model.Cookie("settings");
 	var appSettings = settingsCookie.get();
-	
 	Mojo.Log.info("Setting - Enabled is: " + appSettings[settingName + "Enabled"]);
 
 	//Read and set brightness
@@ -63,6 +68,11 @@ StageAssistant.prototype.launchWithAlarm = function()
 	
 	//Then we'll need to set the alarms again for next time, before we die
 	this.manageAllAlarms(appSettings, settingName);
+
+	//Finally, let the screen go back to sleep
+	Mojo.Controller.stageController.setWindowProperties({
+		blockScreenTimeout: false
+	});
 }
 
 StageAssistant.prototype.manageAllAlarms = function(appSettings, currentAlarmName)
