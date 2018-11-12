@@ -116,8 +116,8 @@ SystemService.prototype.SetSystemBrightness = function (newBrightness)
     var request = new Mojo.Service.Request(this.service_identifier, {
         method: 'setProperty',
         parameters:{maximumBrightness: newBrightness},
-        onSuccess: function(response) { Mojo.Log.error("Screen brightness set! to " + newBrightness); },
-        onFailure: function(response) { Mojo.Log.error("Screen brightess not set!", JSON.stringify(response)); }
+        onSuccess: function(response) { Mojo.Log.error("Screen brightness set to " + newBrightness); },
+        onFailure: function(response) { Mojo.Log.error("Screen brightess not set", JSON.stringify(response)); }
     });
     return request;
 }

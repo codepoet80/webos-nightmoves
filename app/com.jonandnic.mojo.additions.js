@@ -7,8 +7,8 @@ this.Additions = function () {
 }
 
 Additions.ShowDialogBox = function(title, message){
-    var StageController = Mojo.Controller.getAppController().getActiveStageController();
-    this.controller = StageController.activeScene();
+    var stageController = Mojo.Controller.getAppController().getActiveStageController();
+    this.controller = stageController.activeScene();
     
     this.controller.showAlertDialog({
     onChoose: function(value) {},
@@ -20,8 +20,8 @@ Additions.ShowDialogBox = function(title, message){
 
 Additions.DisableWidget = function(widgetName, disabledValue)
 {
-    var StageController = Mojo.Controller.getAppController().getActiveStageController();
-    this.controller = StageController.activeScene();
+    var stageController = Mojo.Controller.getAppController().getActiveStageController();
+    this.controller = stageController.activeScene();
 
     var thisWidgetSetup = this.controller.getWidgetSetup(widgetName);
     var thisWidgetModel = thisWidgetSetup.model;
@@ -33,8 +33,8 @@ Additions.DisableWidget = function(widgetName, disabledValue)
 
 Additions.SetToggleState = function(widgetName, toggledValue)
 {
-    var StageController = Mojo.Controller.getAppController().getActiveStageController();
-    this.controller = StageController.activeScene();
+    var stageController = Mojo.Controller.getAppController().getActiveStageController();
+    this.controller = stageController.activeScene();
 
     var thisWidgetSetup = this.controller.getWidgetSetup(widgetName);
     var thisWidgetModel = thisWidgetSetup.model;
@@ -82,19 +82,19 @@ Additions.FindAncestorWithIdPart = function (currElement, namePartToSearch, expe
         }
         currElement = parentElement;
     }
-    Mojo.Log.info("Discovered ancestor ids: " + parentList);
+    Mojo.Log.error("Discovered ancestor ids: " + parentList);
     return foundElement;
 }
 
 Additions.EnumerateObject = function(objectToEnumerate)
 {
     for (var key in objectToEnumerate) {
-        Mojo.Log.info("=== prop:" + key + ": " + objectToEnumerate[key]);
+        Mojo.Log.error("=== prop:" + key + ": " + objectToEnumerate[key]);
         if (objectToEnumerate.hasOwnProperty(key)) {
         var obj = objectToEnumerate[key];
         for (var prop in obj) {
                 if (obj.hasOwnProperty(prop)) {
-                    Mojo.Log.info("...... sub: " + prop + " = " + obj[prop])
+                    Mojo.Log.error("...... sub: " + prop + " = " + obj[prop])
                 }
             }
         }

@@ -1,129 +1,66 @@
 function MainAssistant() {
 	
 }
-
-var appSettingsCurrent;
-var baseDateString = "August 25, 2001 ";
-var appSettingsDefaults = {
-	MornEnabled: 'false',
-	MornStart: baseDateString + "06:00:00",
-	MornBright: 90,
-	MornVolume: 70,
-	EveEnabled: 'false',
-	EveStart: baseDateString + "19:30:00",
-	EveBright: 40,
-	EveVolume: 30,
-	NiteEnabled: 'false',
-	NiteStart: baseDateString + "22:00:00",
-	NiteBright: 5,
-	NiteVolume: 1
-};
-
-MainAssistant.prototype.loadSettings = function () {
-	var appSettings = appSettingsDefaults;
-	var settingsCookie = new Mojo.Model.Cookie("settings");
-	try
-	{
-		appSettings = settingsCookie.get();
-		if (typeof appSettings === "undefined" || appSettings == null || !this.checkSettingsValid(appSettings)) {
-			Mojo.Log.info("** Using first run default settings");
-			this.controller.showAlertDialog({
-				onChoose: function(value) {},
-				title: $L("Welcome to Night Moves!"),
-				message: $L("With this app, you can configure the settings you want your webOS device to be set to at different times in the day. Default settings have been loaded to get things started."),
-				choices:[
-					{label:$L("OK"), value:""}
-				]
-			});
-			var appSettings = appSettingsDefaults;
-		}
-		else
-		{
-			Mojo.Log.info("** Using cookie settings!");
-			Mojo.Log.info(JSON.stringify(appSettings))
-		}
-	}
-	catch(ex)
-	{
-		appSettings = appSettingsDefaults;
-		settingsCookie.put(null);
-		Mojo.Log.error("** Settings cookie were corrupt and have been purged!");
-	}
-	return appSettings;
-}
-
-MainAssistant.prototype.checkSettingsValid = function (loadedSettings)
-{
-	var retValue = true;
-	for (var key in appSettingsDefaults) {
-		if (typeof loadedSettings[key] === undefined || loadedSettings[key] == null)
-		{
-			Mojo.Log.warn("** An expected saved setting, " + key + ", was null or undefined.");
-			retValue = false;
-		}
-		if (typeof loadedSettings[key] !== typeof appSettingsDefaults[key])
-		{
-			Mojo.Log.warn("** A saved setting, " + key + ", was of type " + typeof(loadedSettings[key]) + " but expected type " + typeof(appSettingsDefaults[key]));
-			retValue = false;
-		}
-		if (typeof appSettingsDefaults[key] === "string" && appSettingsDefaults[key].indexOf(baseDateString) != -1 && loadedSettings[key].indexOf(baseDateString))
-		{
-			Mojo.Log.info("** A saved time setting did not have the expected date value.");
-			retValue = false;
-		}
-		if (typeof appSettingsDefaults[key] === "string" && (appSettingsDefaults[key] == "false" || appSettingsDefaults[key] == "true"))
-		{
-			if (loadedSettings[key] != "false" && loadedSettings[key] != "true")
-			{
-				Mojo.Log.info("** A saved time setting did not have the expected boolean value.");
-				retValue = false;
-			}
-		}
-	 }
-	 return retValue;
-}
 	
 /* Called before scene is visible, before any transitions take place,and before widgets are rendered. */
-MainAssistant.prototype.setup = function(){
-
-	this.appSettingsCurrent = this.loadSettings();
-	Mojo.Log.info("** Loaded Settings: " + JSON.stringify(this.appSettingsCurrent));
+MainAssistant.prototype.setup = function()
+{
+	Mojo.Log.error("** Loaded Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
 	appModel.DoReset = false;
 	
 	//Setup toggles
 	this.timeTapped = this.timeTapped.bind(this);
-	this.setupToggle('Morn', this.appSettingsCurrent);
-	this.setupToggle('Eve', this.appSettingsCurrent);
-	this.setupToggle('Nite', this.appSettingsCurrent);
+	this.setupToggle('Morn', appModel.AppSettingsCurrent);
+	this.setupToggle('Eve', appModel.AppSettingsCurrent);
+	this.setupToggle('Nite', appModel.AppSettingsCurrent);
 	
 	//Setup sliders
 	this.sliderChanged = this.sliderChanged.bind(this);
-	this.setupSlider("MornBright", this.appSettingsCurrent);
-	this.setupSlider("MornVolume", this.appSettingsCurrent);
-	this.setupSlider("EveBright", this.appSettingsCurrent);
-	this.setupSlider("EveVolume", this.appSettingsCurrent);
-	this.setupSlider("NiteBright", this.appSettingsCurrent);
-	this.setupSlider("NiteVolume", this.appSettingsCurrent);
+	this.setupSlider("MornBright", appModel.AppSettingsCurrent);
+	this.setupSlider("MornVolume", appModel.AppSettingsCurrent);
+	this.setupSlider("EveBright", appModel.AppSettingsCurrent);
+	this.setupSlider("EveVolume", appModel.AppSettingsCurrent);
+	this.setupSlider("NiteBright", appModel.AppSettingsCurrent);
+	this.setupSlider("NiteVolume", appModel.AppSettingsCurrent);
 	
 	//Setup time pickers
 	this.timeSaved = this.timeSaved.bind(this);
-	this.setupTimePicker("Morn", this.appSettingsCurrent);
-	this.setupTimePicker("Eve", this.appSettingsCurrent);
-	this.setupTimePicker("Nite", this.appSettingsCurrent);
+	this.setupTimePicker("Morn", appModel.AppSettingsCurrent);
+	this.setupTimePicker("Eve", appModel.AppSettingsCurrent);
+	this.setupTimePicker("Nite", appModel.AppSettingsCurrent);
 
 	//App Menu (handled in stage controller: stage-assistant.js)
 	this.controller.setupWidget(Mojo.Menu.appMenu, Mojo.Controller.stageController.appMenuAttributes, Mojo.Controller.stageController.appMenuModel);
+
+	//With each launch, we're going to re-establish alarms, in order to "self-heal"
+	//Mojo.Controller.stageController.manageAllAlarms(appModel.AppSettingsCurrent);
 }
 
 MainAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	example, key handlers that are observing the document */
-	Mojo.Additions.SetToggleState("att-toggle-Morn", this.appSettingsCurrent["MornEnabled"]);
-	Mojo.Additions.SetToggleState("att-toggle-Eve", this.appSettingsCurrent["EveEnabled"]);
-	Mojo.Additions.SetToggleState("att-toggle-Nite", this.appSettingsCurrent["NiteEnabled"]);
 
-	//With each launch, we're going to re-establish alarms, in order to "self-heal"
-	Mojo.Controller.stageController.manageAllAlarms(this.appSettingsCurrent);
+	if (appModel.AppSettingsCurrent == appModel.AppSettingsDefault)
+	{		
+		Mojo.Log.error("** Using first run default settings");
+		this.controller.showAlertDialog({
+			onChoose: function(value) {},
+			title: $L("Welcome to Night Moves!"),
+			message: $L("With this app, you can configure the settings you want your webOS device to be set to at different times in the day. Default settings have been loaded to get things started."),
+			choices:[
+				{label:$L("OK"), value:""}
+			]
+		});
+	}
+
+	document.body.className = "palm-default";
+	if (appModel.AppSettingsCurrent.Debug == true)
+	{
+		document.getElementById("divDebug").innerHTML = " - Debug";
+	}
+	Mojo.Additions.SetToggleState("att-toggle-Morn", appModel.AppSettingsCurrent["MornEnabled"]);
+	Mojo.Additions.SetToggleState("att-toggle-Eve", appModel.AppSettingsCurrent["EveEnabled"]);
+	Mojo.Additions.SetToggleState("att-toggle-Nite", appModel.AppSettingsCurrent["NiteEnabled"]);
 }
 
 MainAssistant.prototype.setupTimePicker = function (hiddenDivName, settings) {
@@ -137,12 +74,16 @@ MainAssistant.prototype.setupTimePicker = function (hiddenDivName, settings) {
 		}
 	);
 
-	var dateString = this.appSettingsCurrent[hiddenDivName + "Start"];
+	var dateString = appModel.AppSettingsCurrent[hiddenDivName + "Start"];
 	var useTime = new Date(dateString);
+	var minuteInterval = 5;
+	if (appModel.AppSettingsCurrent.Debug)
+		minuteInterval = 1;
 	this.controller.setupWidget("timePicker" + hiddenDivName,
 	this.attributes = {
 			label: 'Time',
-			modelProperty: 'time'
+			modelProperty: 'time',
+			minuteInterval: minuteInterval
 		},
 		this.model = {
 			time: useTime
@@ -172,15 +113,15 @@ MainAssistant.prototype.timeSaved = function (event)
 	var findSettingName = findButton.id.replace("btn", "");
 	var thisWidgetSetup = this.controller.getWidgetSetup("timePicker" + findSettingName);
 	var setTime = thisWidgetSetup.model.time.getHours() + ":" + thisWidgetSetup.model.time.getMinutes();
-	setTime = baseDateString + setTime;
+	setTime = appModel.BaseDateString + setTime;
 
-	this.appSettingsCurrent[findSettingName + "Start"] = setTime;
-	this.saveSettings();
-	this.updateTimeLabel(findSettingName, this.appSettingsCurrent[findSettingName + "Start"]);
+	appModel.AppSettingsCurrent[findSettingName + "Start"] = setTime;
+	appModel.SaveSettings();
+	this.updateTimeLabel(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"]);
 	
-	Mojo.Log.info("**** Settings when time saved: " + JSON.stringify(this.appSettingsCurrent));
+	Mojo.Log.error("**** Settings when time saved: " + JSON.stringify(appModel.AppSettingsCurrent));
 	this.controller.get("drawer" + findSettingName).mojo.toggleState();
-	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, this.appSettingsCurrent[findSettingName + "Start"], this.appSettingsCurrent[findSettingName + "Enabled"]);
+	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
 	if (newTime != false)
 	{
 		if (newTime != true)
@@ -237,9 +178,9 @@ MainAssistant.prototype.sliderChanged = function(event){
 	updateLabel.innerHTML = updateLabel.title + ": " + event.value + "%";
 	var settingName = event.srcElement.id.replace("sld", "");
 
-	this.appSettingsCurrent[settingName] = event.value;
-	this.saveSettings();
-	Mojo.Log.info("**** Settings after slider changed: " + JSON.stringify(this.appSettingsCurrent));
+	appModel.AppSettingsCurrent[settingName] = event.value;
+	appModel.SaveSettings();
+	Mojo.Log.error("**** Settings after slider changed: " + JSON.stringify(appModel.AppSettingsCurrent));
 }
 
 MainAssistant.prototype.setupToggle = function (toggleName, settings)
@@ -269,11 +210,11 @@ MainAssistant.prototype.togglePressed = function(event){
 	var findSettingName = event.srcElement.id.replace("att-toggle-", "");
 	findSettingName = findSettingName;
 
-	this.appSettingsCurrent[findSettingName + "Enabled"] = event.value.toString();
-	this.saveSettings();
-	Mojo.Log.info("**** Settings when toggle pressed: " + JSON.stringify(this.appSettingsCurrent));
+	appModel.AppSettingsCurrent[findSettingName + "Enabled"] = event.value.toString();
+	appModel.SaveSettings();
+	Mojo.Log.error("**** Settings when toggle pressed: " + JSON.stringify(appModel.AppSettingsCurrent));
 
-	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, this.appSettingsCurrent[findSettingName + "Start"], this.appSettingsCurrent[findSettingName + "Enabled"]);
+	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
 	if (newTime != false)
 	{
 		if (newTime != true)
@@ -283,28 +224,22 @@ MainAssistant.prototype.togglePressed = function(event){
 	}
 }
 
-MainAssistant.prototype.saveSettings = function ()
-{
-	var settingsCookie = new Mojo.Model.Cookie("settings");
-	settingsCookie.put(this.appSettingsCurrent);
-}
-
 MainAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	this scene is popped or another scene is pushed on top */
-	Mojo.Log.info("Night moves is being deactivated.");
+	Mojo.Log.error("Night moves is being deactivated.");
 	if (appModel.DoReset)
 	{
-		Mojo.Log.info("Settings are being reset.");
+		Mojo.Log.error("Settings are being reset.");
 		//Clear out settings
-		this.appSettingsCurrent = null;
+		appModel.AppSettingsCurrent = null;
 	}
 	else
 	{
-		Mojo.Log.info("Settings are being saved.");
+		Mojo.Log.error("Settings are being saved.");
 	}
-	Mojo.Log.info("** Saved Settings: " + JSON.stringify(this.appSettingsCurrent));
-	this.saveSettings();
+	Mojo.Log.error("** Saved Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
+	appModel.SaveSettings();
 }
 
 MainAssistant.prototype.cleanup = function(event) {
