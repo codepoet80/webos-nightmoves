@@ -6,5 +6,4 @@ You can use it to dim the screen and lower the volume at bed time, and increase 
 
 At the moment it works well on the Pre3, poorly on the Touchpad, and is un-tested on other devices (although it theoretically should work, since it uses official APIs.)
 
-![nightmoves-screenshot](https://raw.githubusercontent.com/codepoet80/webos-nightmoves/master/screenshot.png "Night Moves UI")
-<img src="https://raw.githubusercontent.com/codepoet80/webos-nightmoves/master/screenshot.png" height="300">
+<img src="https://raw.githubusercontent.com/codepoet80/webos-nightmoves/master/screenshot.png" height="400" alt="Night Moves Screenshot">
