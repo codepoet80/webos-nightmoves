@@ -59,7 +59,7 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName, running)
 		this.applySettingsFromAlarm(AlarmName);
 		if (!appModel.AppSettingsCurrent.Debug)
 		{
-			this.manageAllAlarms(appModel.AppSettingsCurrent);
+			this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
 		}
 		else
 		{
@@ -131,22 +131,22 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 			var useAbsolute = false;
 			if (alarmName == forceAbsolute)
 			{
-				Mojo.Log.error("Forcing absolute for alarm by name " + alarmName );
+				Mojo.Log.error("### Forcing absolute for alarm by name " + alarmName );
 				useAbsolute = true;
 			}
 			if (forceAbsolute == true)
 			{
-				Mojo.Log.error("Forcing absolute for alarm by boolean " + alarmName );
+				Mojo.Log.error("### Forcing absolute for alarm by boolean " + alarmName );
 				useAbsolute = true;
 			}
 			if (today.getHours() > alarm.getHours())
 			{
-				Mojo.Log.error("Set absolute for alarm where hours are earlier in the day " + alarmName);
+				Mojo.Log.error("### Set absolute for alarm where hours are earlier in the day " + alarmName);
 				useAbsolute = true;
 			}
 			if (today.getHours() == alarm.getHours() && today.getMinutes() >= alarm.getMinutes()-1)
 			{
-				Mojo.Log.error("Set absolute for alarm where hours and minutes are earlier in the day " + alarmName);
+				Mojo.Log.error("### Set absolute for alarm where hours and minutes are earlier in the day " + alarmName);
 				useAbsolute = true;
 			}
 
