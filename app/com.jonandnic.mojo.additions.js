@@ -1,7 +1,11 @@
 /*
-Mojo Additions 0.3a
-Functions I use often, that probably should have been part of Mojo
-They either fix bugs in Mojo or make it easier to use.
+Mojo Additions
+ Version 0.3a
+ Created: 2018
+ Author: Jonathan Wise
+ License: MIT
+ Description: Functions I use often, that probably should have been part of Mojo.
+              They either fix bugs in Mojo or make it easier to use.
 */
 
 this.Additions = function () {
