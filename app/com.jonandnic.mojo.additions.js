@@ -1,6 +1,7 @@
 /*
-Function I use often, that probably should have been part of Mojo
-Some of them fix bugs in Mojo or make it easier to use.
+Mojo Additions 0.3a
+Functions I use often, that probably should have been part of Mojo
+They either fix bugs in Mojo or make it easier to use.
 */
 
 this.Additions = function () {
@@ -28,7 +29,27 @@ Additions.DisableWidget = function(widgetName, disabledValue)
     thisWidgetModel.disabled = disabledValue;
 
     this.controller.setWidgetModel(widgetName, thisWidgetModel);
-    this.controller.modelChanged(this.controller.get(widgetName));
+    this.controller.modelChanged(thisWidgetModel);
+}
+
+Additions.SetPickerWidgetValue = function(widgetName, newvalue)
+{
+    var stageController = Mojo.Controller.getAppController().getActiveStageController();
+    this.controller = stageController.activeScene();
+
+	var thisWidgetModel = this.controller.getWidgetSetup(widgetName).model;
+	thisWidgetModel.value = newvalue;
+	this.controller.setWidgetModel(widgetName, thisWidgetModel);
+}
+
+Additions.SetWidgetLabel = function(widgetName, newvalue)
+{
+    var stageController = Mojo.Controller.getAppController().getActiveStageController();
+    this.controller = stageController.activeScene();
+
+	var thisWidgetModel = this.controller.getWidgetSetup(widgetName).model;
+	thisWidgetModel.label = newvalue;
+	this.controller.setWidgetModel(widgetName, thisWidgetModel);
 }
 
 Additions.SetToggleState = function(widgetName, toggledValue)
