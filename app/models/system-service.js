@@ -1,6 +1,6 @@
 /*
 SystemService Model
- Version 0.2
+ Version 0.2a
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -111,12 +111,14 @@ SystemService.prototype.Vibrate = function(vibePeriod, vibeDuration)
 {
 	var success = true;
 	Mojo.Log.error("Vibrating device.");
-	this.vibeRequest = new Mojo.Service.Request("palm://com.palm.vibrate/vibrate", {
+	Mojo.Controller.getAppController().playSoundNotification("vibrate");
+	//The below should work, but doesn't
+	/*this.vibeRequest = new Mojo.Service.Request("palm://com.palm.vibrate/vibrate", {
 		period: vibePeriod,
 		duration: vibeDuration,
 		onSuccess:function() { success = true; },
 		onFailure:function() { success = false; }
-	});
+	});*/
 	return success;
 }
 
