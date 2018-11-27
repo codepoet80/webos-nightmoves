@@ -1,8 +1,8 @@
 var appModel = null;
-var systemService = null;
+var systemModel = null;
 function AppAssistant(appController) {
 	appModel = new AppModel();
-	systemService = new SystemService();
+	systemModel = new SystemModel();
 	Mojo.Additions = Additions;
 }
 

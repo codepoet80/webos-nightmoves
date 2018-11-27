@@ -83,9 +83,9 @@ StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 	Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
 	
 	//Apply the settings
-	systemService.SetSystemBrightness(appModel.AppSettingsCurrent[settingName + "Bright"]);
-	systemService.SetSystemVolume(appModel.AppSettingsCurrent[settingName + "Volume"]);
-	systemService.SetRingtoneVolume(appModel.AppSettingsCurrent[settingName + "Volume"]);
+	systemModel.SetSystemBrightness(appModel.AppSettingsCurrent[settingName + "Bright"]);
+	systemModel.SetSystemVolume(appModel.AppSettingsCurrent[settingName + "Volume"]);
+	systemModel.SetRingtoneVolume(appModel.AppSettingsCurrent[settingName + "Volume"]);
 }
 
 StageAssistant.prototype.manageAllAlarms = function(appSettings, currentAlarmName)
@@ -123,7 +123,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 		{
 			Mojo.Log.error("### Alarm debug is on, over-riding alarm time.");
 			//Seconds
-			systemService.SetSystemAlarmRelative(alarmName, "00:00:05:00");
+			systemModel.SetSystemAlarmRelative(alarmName, "00:00:05:00");
 		}
 		else	//Fire on scheduled date time
 		{
@@ -167,7 +167,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 				relativeTime = hours + ":" + minutes + ":00:00";
 
 				Mojo.Log.error("### Relative alarm time should be: " + relativeTime);
-				success = systemService.SetSystemAlarmRelative(alarmName, relativeTime);
+				success = systemModel.SetSystemAlarmRelative(alarmName, relativeTime);
 				if (!success)
 				{
 					Mojo.showAlertDialog("Error", "A relative alarm could not be set.");
@@ -185,7 +185,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 				Mojo.Log.error("### Alarm time requested was: " + alarmTime);
 				var timeToUse = constructUTCAlarm(alarmTime, appModel.AppSettingsCurrent.Debug);
 				Mojo.Log.error("### Alarm time requested is: " + timeToUse);
-				success = systemService.SetSystemAlarmAbsolute(alarmName, timeToUse);
+				success = systemModel.SetSystemAlarmAbsolute(alarmName, timeToUse);
 				if (!success)
 				{
 					Mojo.showAlertDialog("Error", "An absolute alarm could not be set");
@@ -199,7 +199,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 	}
 	else
 	{
-		success = systemService.ClearSystemAlarm(alarmName);
+		success = systemModel.ClearSystemAlarm(alarmName);
 	}
 	return alarmSetResult;
 }

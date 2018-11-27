@@ -1,5 +1,5 @@
 /*
-SystemService Model
+SystemModel Model
  Version 0.2a
  Created: 2018
  Author: Jonathan Wise
@@ -7,12 +7,12 @@ SystemService Model
  Description: A generic (and therefore re-usable) model for accessing webOS system features more easily
 */
 
-var SystemService = function() { 
+var SystemModel = function() { 
 
 };
 
 //Create a named System Alarm using an absolute time
-SystemService.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
+SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 {
 	var success = true;
     Mojo.Log.error("Setting absolute alarm time: " + alarmTime);
@@ -42,7 +42,7 @@ SystemService.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 }
 
 //Create a named System Alarm using a relative time
-SystemService.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
+SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 {
 	var success = true;
     Mojo.Log.error("Setting relative alarm time: " + alarmTime);
@@ -72,7 +72,7 @@ SystemService.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 }
 
 //Remove a named System alarm
-SystemService.prototype.ClearSystemAlarm = function(alarmName)
+SystemModel.prototype.ClearSystemAlarm = function(alarmName)
 {
 	var success = true;
     Mojo.Log.error("Clearing alarm: " + alarmName);
@@ -92,7 +92,7 @@ SystemService.prototype.ClearSystemAlarm = function(alarmName)
 	return success;
 }
 
-SystemService.prototype.PlaySound = function(soundName)
+SystemModel.prototype.PlaySound = function(soundName)
 {
 	var success = true;
 	Mojo.Log.error("Playing sound: " + soundName);
@@ -107,7 +107,7 @@ SystemService.prototype.PlaySound = function(soundName)
 	return success;
 }
 
-SystemService.prototype.Vibrate = function(vibePeriod, vibeDuration)
+SystemModel.prototype.Vibrate = function(vibePeriod, vibeDuration)
 {
 	var success = true;
 	Mojo.Log.error("Vibrating device.");
@@ -122,7 +122,7 @@ SystemService.prototype.Vibrate = function(vibePeriod, vibeDuration)
 	return success;
 }
 
-SystemService.prototype.AllowDisplaySleep = function ()
+SystemModel.prototype.AllowDisplaySleep = function ()
 {
 	var stageController = Mojo.Controller.getAppController().getActiveStageController();
 	
@@ -134,7 +134,7 @@ SystemService.prototype.AllowDisplaySleep = function ()
 	});
 }
 
-SystemService.prototype.PreventDisplaySleep = function ()
+SystemModel.prototype.PreventDisplaySleep = function ()
 {
 	var stageController = Mojo.Controller.getAppController().getActiveStageController();
 	
