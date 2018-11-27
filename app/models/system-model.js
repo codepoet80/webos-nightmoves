@@ -1,5 +1,5 @@
 /*
-SystemModel Model
+System Model
  Version 0.2a
  Created: 2018
  Author: Jonathan Wise

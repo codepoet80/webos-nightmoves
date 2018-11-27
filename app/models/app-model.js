@@ -1,10 +1,23 @@
+/*
+AppModel Model
+ Version 0.2
+ Created: 2018
+ Author: Jonathan Wise
+ License: MIT
+ Description: Common functions for webOS apps, particularly for managing persisted options in cookies
+*/
+
 var AppModel = function()
 {
+	//Define your app-wide static settings here
     this.AlarmLaunch = false;
-    this.AlarmLaunchName = null;
-    this.DoReset = false;
+	this.AlarmLaunchName = null;
+	this.DoReset = false;
     this.BaseDateString = "August 25, 2001 ";
-    this.AppSettingsCurrent = null;
+	this.DefaultScene = "main";    //This is used when defaults are re-loaded
+
+	this.AppSettingsCurrent = null;
+	//Define cookie defaults here and they will be loaded and enforced below
     this.AppSettingsDefaults = {
 		Debug: false,
         MornEnabled: 'false',
@@ -22,6 +35,10 @@ var AppModel = function()
     };
 }
 
+//You probably don't need to change the below functions since they all work against the Cookie defaults you defined above.
+//  LoadSettings: call when your app starts, or you want to load previously persisted options.
+//  SaveSettings: call any time you want to persist an option.
+//  ResetSettings: call if you want to forget stored settings and return to defaults. Your default scene will be popped and re-pushed.
 AppModel.prototype.LoadSettings = function () {
     this.AppSettingsCurrent = this.AppSettingsDefaults;
     var loadSuccess = false;
@@ -91,6 +108,6 @@ AppModel.prototype.ResetSettings = function()
 	this.DoReset = true;
 	//Restart main scene
 	var stageController = Mojo.Controller.stageController;
-	stageController.popScene('main');
-	stageController.pushScene('main');
+	stageController.popScene('DefaultScene');
+	stageController.pushScene('DefaultScene');
 }
