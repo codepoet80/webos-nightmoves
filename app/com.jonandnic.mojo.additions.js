@@ -1,6 +1,6 @@
 /*
 Mojo Additions
- Version 0.3a
+ Version 0.3b
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -58,7 +58,7 @@ Additions.SetWidgetLabel = function(widgetName, newvalue)
 
 Additions.SetToggleState = function(widgetName, toggledValue)
 {
-    var stageController = Mojo.Controller.getAppController().getActiveStageController();
+    var stageController = Mojo.Controller.getAppController().getStageController("");
     this.controller = stageController.activeScene();
 
     var thisWidgetSetup = this.controller.getWidgetSetup(widgetName);
