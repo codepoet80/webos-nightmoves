@@ -94,36 +94,35 @@ SystemService.prototype.ClearSystemAlarm = function(alarmName)
 
 SystemService.prototype.PlaySound = function(soundName)
 {
-	var stageController = Mojo.Controller.getAppController().getActiveStageController();
-	this.controller = stageController.activeScene();
-	
-	this.controller.serviceRequest("palm://com.palm.audio/systemsounds", {
+	var success = true;
+	Mojo.Log.error("Playing sound: " + soundName);
+	this.soundRequest = new Mojo.Service.Request("palm://com.palm.audio/systemsounds", {
 		method: "playFeedback",
 		parameters: {
 			name: soundName
 		},
-		onSuccess:function() { return true; },
-		onFailure:function() { return false; }
+		onSuccess:function() { success = true; },
+		onFailure:function() { success = false; }
 	});
+	return success;
 }
 
 SystemService.prototype.Vibrate = function(vibePeriod, vibeDuration)
 {
-	var stageController = Mojo.Controller.getAppController().getActiveStageController();
-	this.controller = stageController.activeScene();
-	
-	this.controller.serviceRequest("palm://com.palm.vibrate/vibrate", {
+	var success = true;
+	Mojo.Log.error("Vibrating device.");
+	this.vibeRequest = new Mojo.Service.Request("palm://com.palm.vibrate/vibrate", {
 		period: vibePeriod,
 		duration: vibeDuration,
-		onSuccess:function() { return true; },
-		onFailure:function() { return false; }
+		onSuccess:function() { success = true; },
+		onFailure:function() { success = false; }
 	});
+	return success;
 }
 
 SystemService.prototype.AllowDisplaySleep = function ()
 {
 	var stageController = Mojo.Controller.getAppController().getActiveStageController();
-	this.controller = stageController.activeScene();
 	
 	//Tell the System it doesn't have to stay awake any more
 	Mojo.Log.info("allowing display sleep");
@@ -136,7 +135,6 @@ SystemService.prototype.AllowDisplaySleep = function ()
 SystemService.prototype.PreventDisplaySleep = function ()
 {
 	var stageController = Mojo.Controller.getAppController().getActiveStageController();
-	this.controller = stageController.activeScene();
 	
 	//Ask the System to stay awake while timer is running
 	Mojo.Log.info("preventing display sleep");
