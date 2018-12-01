@@ -5,8 +5,9 @@ function MainAssistant() {
 /* Called before scene is visible, before any transitions take place,and before widgets are rendered. */
 MainAssistant.prototype.setup = function()
 {
-	Mojo.Log.error("** Loaded Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
+	appModel.LoadSettings();
 	appModel.DoReset = false;
+	Mojo.Log.error("** Loaded Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
 	
 	//Setup toggles
 	this.timeTapped = this.timeTapped.bind(this);
@@ -231,8 +232,6 @@ MainAssistant.prototype.deactivate = function(event) {
 	if (appModel.DoReset)
 	{
 		Mojo.Log.error("Settings are being reset.");
-		//Clear out settings
-		appModel.AppSettingsCurrent = null;
 	}
 	else
 	{

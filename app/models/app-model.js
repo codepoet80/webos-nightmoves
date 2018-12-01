@@ -106,8 +106,9 @@ AppModel.prototype.ResetSettings = function()
 {
 	//Tell main scene to drop settings
 	this.DoReset = true;
+	this.AppSettingsCurrent = this.AppSettingsDefault;
 	//Restart main scene
 	var stageController = Mojo.Controller.stageController;
-	stageController.popScene('DefaultScene');
-	stageController.pushScene('DefaultScene');
+	stageController.popScene(this.DefaultScene);
+	stageController.pushScene(this.DefaultScene);
 }

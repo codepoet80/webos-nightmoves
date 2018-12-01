@@ -24,7 +24,7 @@ SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 			"wakeup": true,
 			"uri": "palm://com.palm.applicationManager/open",
 			"params": {
-				"id": "com.jonandnic.webos.stopwatch",
+				"id": Mojo.Controller.appInfo.id,
 				"params": {"action": alarmName}
 			}
 		},
@@ -54,7 +54,7 @@ SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 			"wakeup": true,
 			"uri": "palm://com.palm.applicationManager/open",
 			"params": {
-				"id": "com.jonandnic.webos.stopwatch",
+				"id": Mojo.Controller.appInfo.id,
 				"params": {"action": alarmName}
 			}
 		},
