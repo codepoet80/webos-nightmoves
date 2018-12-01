@@ -145,3 +145,42 @@ SystemModel.prototype.PreventDisplaySleep = function ()
 		blockScreenTimeout: true
 	});
 }
+
+//Set the System Volume to a given level
+SystemModel.prototype.SetSystemVolume = function (newVolume)
+{
+    this.service_identifier = 'palm://com.palm.audio/system';
+    var request = new Mojo.Service.Request(this.service_identifier, {
+        method: 'setVolume',
+        parameters: {volume: newVolume },
+        onSuccess: function(response) { Mojo.Log.error("System volume set to " + newVolume ); },
+        onFailure: function(response) { Mojo.Log.error("System volume not set!", JSON.stringify(response)); }		
+    });
+    return request;
+}
+
+//Set the Ringtone Volume to a given level
+SystemModel.prototype.SetRingtoneVolume = function (newVolume)
+{
+    this.service_identifier = 'palm://com.palm.audio/ringtone';
+    var request = new Mojo.Service.Request(this.service_identifier, {
+        method: 'setVolume',
+        parameters: {volume: newVolume },
+        onSuccess: function(response) { Mojo.Log.error("Ringtone volume set to " + newVolume); },
+        onFailure: function(response) { Mojo.Log.error("Ringtone volume not set!", JSON.stringify(response)); }		
+    });
+    return request;
+}
+
+//Set the System Brightness to a given level
+SystemModel.prototype.SetSystemBrightness = function (newBrightness)
+{
+    this.service_identifier = 'palm://com.palm.display/control';
+    var request = new Mojo.Service.Request(this.service_identifier, {
+        method: 'setProperty',
+        parameters:{maximumBrightness: newBrightness},
+        onSuccess: function(response) { Mojo.Log.error("Screen brightness set! to " + newBrightness); },
+        onFailure: function(response) { Mojo.Log.error("Screen brightess not set!", JSON.stringify(response)); }
+    });
+    return request;
+}
