@@ -43,9 +43,11 @@ StageAssistant.prototype.setup = function()
 StageAssistant.prototype.launchWithAlarm = function(AlarmName, running)
 {
 	var stageController = Mojo.Controller.stageController;
-	//If this is a touchpad, maybe opening a scene can force it to awake
-	//systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 160, false, false);
-	
+	//If this is a touchpad, opening a scene can force it to awake
+	if (Mojo.Environment.DeviceInfo.platformVersionMajor>=3)
+	{
+		systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 160, false, false);
+	}
 	this.applySettingsFromAlarm(AlarmName);
 	if (!appModel.AppSettingsCurrent.Debug)
 		this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);

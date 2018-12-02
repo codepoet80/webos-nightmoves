@@ -1,6 +1,6 @@
 /*
 App Model
- Version 0.3
+ Version 0.3a
  Created: 2018
  Author: Jonathan Wise
  License: MIT
