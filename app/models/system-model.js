@@ -220,7 +220,8 @@ SystemModel.prototype.ShowNotificationStage = function(stageName, sceneName, hei
 		name: stageName, 
 		lightweight: true,
 		height: heightToUse, 
-		sound: soundToUse
+		sound: soundToUse,
+		clickableWhenLocked: true
 	}, stageCallBack, 'popupalert');
 }
 

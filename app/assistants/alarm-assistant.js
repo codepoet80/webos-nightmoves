@@ -6,16 +6,20 @@ function AlarmAssistant(argFromPusher){
 
 closeTimer = null;
 AlarmAssistant.prototype.setup = function(){
-	appModel.LoadSettings();
+    appModel.LoadSettings();
+    systemModel.PreventDisplaySleep();
     //set up button widget
 	this.controller.setupWidget('quit-button', {}, {buttonLabel:'Close'})
 	this.quitButtonHandler = this.handleQuitButton.bind(this);
     Mojo.Event.listen(this.controller.get('quit-button'), Mojo.Event.tap, this.quitButtonHandler);
-    setTimeout("doClose()", 1000);
+    Mojo.Log.error("notification stage setup at " + new Date());
+    setTimeout("doClose()", 2000);
 }
 
 doClose = function()
 {
+    systemModel.AllowDisplaySleep();
+    Mojo.Log.error("Closing notification window at " + new Date());
     Mojo.Controller.appController.closeStage("alarm");
 }
 

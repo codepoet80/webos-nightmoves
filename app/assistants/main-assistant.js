@@ -6,7 +6,6 @@ function MainAssistant() {
 MainAssistant.prototype.setup = function()
 {
 	appModel.LoadSettings();
-	appModel.DoReset = false;
 	Mojo.Log.error("** Loaded Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
 	
 	//Setup toggles
@@ -33,7 +32,7 @@ MainAssistant.prototype.setup = function()
 	//App Menu (handled in stage controller: stage-assistant.js)
 	this.controller.setupWidget(Mojo.Menu.appMenu, Mojo.Controller.stageController.appMenuAttributes, Mojo.Controller.stageController.appMenuModel);
 
-	//With each launch, we're going to re-establish alarms, in order to "self-heal"
+	//With each launch, maybe we should re-establish alarms, in order to "self-heal"
 	//Mojo.Controller.stageController.manageAllAlarms(appModel.AppSettingsCurrent);
 }
 
@@ -41,27 +40,26 @@ MainAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	example, key handlers that are observing the document */
 
-	if (appModel.AppSettingsCurrent == appModel.AppSettingsDefault)
-	{		
-		Mojo.Log.error("** Using first run default settings");
-		this.controller.showAlertDialog({
-			onChoose: function(value) {},
-			title: $L("Welcome to Night Moves!"),
-			message: $L("With this app, you can configure the settings you want your webOS device to be set to at different times in the day. Default settings have been loaded to get things started."),
-			choices:[
-				{label:$L("OK"), value:""}
-			]
-		});
-	}
-
 	document.body.className = "palm-default";
-	if (appModel.AppSettingsCurrent.Debug == true)
-	{
-		document.getElementById("divDebug").innerHTML = " - Debug";
-	}
+
+	//Set toggles
 	Mojo.Additions.SetToggleState("att-toggle-Morn", appModel.AppSettingsCurrent["MornEnabled"]);
 	Mojo.Additions.SetToggleState("att-toggle-Eve", appModel.AppSettingsCurrent["EveEnabled"]);
 	Mojo.Additions.SetToggleState("att-toggle-Nite", appModel.AppSettingsCurrent["NiteEnabled"]);
+
+	//Welcome new users
+	if (appModel.AppSettingsCurrent["FirstRun"] == true)
+	{	
+		Mojo.Log.error("** Using first run default settings");
+		appModel.AppSettingsCurrent["FirstRun"] = false;
+		appModel.SaveSettings();
+		var welcomeMessage = "With this app, you can configure the settings you want your webOS device to be set to at different times in the day. Default settings have been loaded to get things started.";
+		if (Mojo.Environment.DeviceInfo.platformVersionMajor>=3)
+		{
+			welcomeMessage += "<br><br><b>TouchPad Usage Notes:</b> Because the TouchPad won't allow its settings to be changed from behind the lock screen, this app will only work if the lock screen is not active. This occurs when the TouchPad is charging (including a TouchStone) or if the lock screen has been disabled with a tweak."
+		}
+		Mojo.Additions.ShowDialogBox("Welcome to Night Moves!", welcomeMessage);
+	}
 }
 
 MainAssistant.prototype.setupTimePicker = function (hiddenDivName, settings) {
@@ -223,22 +221,6 @@ MainAssistant.prototype.togglePressed = function(event){
 MainAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	this scene is popped or another scene is pushed on top */
-	Mojo.Log.error("Night moves is being deactivated.");
-	if (appModel.DoReset)
-	{
-		Mojo.Log.error("Settings are being reset.");
-	}
-	else
-	{
-		Mojo.Log.error("Settings are being saved.");
-	}
-	Mojo.Log.error("** Saved Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
-	appModel.SaveSettings();
-}
-
-MainAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	a result of being popped off the scene stack */
 	Mojo.Event.stopListening(this.controller.get('att-toggle-Morn'), Mojo.Event.propertyChange, this.togglePressed);
 	Mojo.Event.stopListening(this.controller.get('att-toggle-Eve'), Mojo.Event.propertyChange, this.togglePressed);
 	Mojo.Event.stopListening(this.controller.get('att-toggle-Nite'), Mojo.Event.propertyChange, this.togglePressed);
@@ -248,4 +230,14 @@ MainAssistant.prototype.cleanup = function(event) {
 	Mojo.Event.stopListening(this.controller.get('sldEveVolume'), Mojo.Event.propertyChanged, this.sliderChanged);
 	Mojo.Event.stopListening(this.controller.get('sldNiteBright'), Mojo.Event.propertyChanged, this.sliderChanged);
 	Mojo.Event.stopListening(this.controller.get('sldNiteVolume'), Mojo.Event.propertyChanged, this.sliderChanged);
+
+	//Save settings
+	Mojo.Log.error("Night moves is being deactivated.");
+	appModel.SaveSettings();
+	Mojo.Log.error("** Saved Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
+}
+
+MainAssistant.prototype.cleanup = function(event) {
+	/* this function should do any cleanup needed before the scene is destroyed as 
+	a result of being popped off the scene stack */
 }	

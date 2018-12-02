@@ -30,7 +30,7 @@ StageAssistant.prototype.setup = function()
 		Mojo.Log.error("Normal stage launch. Pushing main scene.");
 		this.controller.pushScene('main');
 	}
-	else	//If its an alarm re-launch, handle the alarm and close
+	else	//If its an alarm re-launch, handle the alarm and if there's no other window close
 	{
 		Mojo.Log.error("Alarm stage launch. Using alarm launch.");
 		if (stageController.getScenes() > 0)
@@ -43,33 +43,17 @@ StageAssistant.prototype.setup = function()
 StageAssistant.prototype.launchWithAlarm = function(AlarmName, running)
 {
 	var stageController = Mojo.Controller.stageController;
-
-	if (Mojo.Environment.DeviceInfo.platformVersionMajor>=3)
-	{
-		//This is a touchpad, working on using a scene to force it to awake
-		//	Unfortunately, then it stays awake...
-		systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 160, false, false);
-		/*var pushPopup = function(stageController)
-		{
-			stageController.pushScene('settings', AlarmName);
-		}
-		Mojo.Controller.getAppController().createStageWithCallback({name: "popupStage", lightweight: true, height: 200}, pushPopup, 'popupalert');
-		*/
-	}
-	/*else
-	{*/
-		this.applySettingsFromAlarm(AlarmName);
-		if (!appModel.AppSettingsCurrent.Debug)
-		{
-			this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
-		}
-		else
-		{
-			Mojo.Log.error("Not re-setting alarms, since we're in Debug mode");
-		}
-		if (!running)
-			stageController.window.close();
-	//}
+	//If this is a touchpad, maybe opening a scene can force it to awake
+	//systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 160, false, false);
+	
+	this.applySettingsFromAlarm(AlarmName);
+	if (!appModel.AppSettingsCurrent.Debug)
+		this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
+	else
+		Mojo.Log.error("Not re-setting alarms, since we're in Debug mode");
+	
+	if (!running)
+		stageController.window.close();
 }
 
 StageAssistant.prototype.applySettingsFromAlarm = function(settingName)

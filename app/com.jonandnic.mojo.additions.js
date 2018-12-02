@@ -17,9 +17,10 @@ Additions.ShowDialogBox = function(title, message){
     
     this.controller.showAlertDialog({
     onChoose: function(value) {},
-    title:title,
-    message:message,
-        choices:[ {label:'OK', value:'OK', type:'color'} ]
+        title:title,
+        message:message,
+            choices:[ {label:'OK', value:'OK'} ],
+        allowHTMLMessage:true
     });
 }
 

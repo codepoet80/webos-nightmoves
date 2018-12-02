@@ -12,7 +12,6 @@ var AppModel = function()
 	//Define your app-wide static settings here
     this.AlarmLaunch = false;
 	this.AlarmLaunchName = null;
-	this.DoReset = false;
     this.BaseDateString = "August 25, 2001 ";
 	this.DefaultScene = "main";    //This is used when defaults are re-loaded
 
@@ -20,6 +19,7 @@ var AppModel = function()
 	//Define cookie defaults here and they will be loaded and enforced below
     this.AppSettingsDefaults = {
 		Debug: false,
+		FirstRun: true,
         MornEnabled: 'false',
         MornStart: this.BaseDateString + "06:00:00",
         MornBright: 90,
@@ -46,7 +46,7 @@ AppModel.prototype.LoadSettings = function () {
 	try
 	{
 		appSettings = settingsCookie.get();
-		if (typeof appSettings === "undefined" || appSettings == null || !this.checkSettingsValid(appSettings)) {
+		if (typeof appSettings == "undefined" || appSettings == null || !this.checkSettingsValid(appSettings)) {
 			Mojo.Log.error("** Using first run default settings");
 		}
 		else
@@ -61,6 +61,7 @@ AppModel.prototype.LoadSettings = function () {
 	{
 		settingsCookie.put(null);
 		Mojo.Log.error("** Settings cookie were corrupt and have been purged!");
+		Mojo.Log.error(ex);
 	}
 	return loadSuccess;
 }
@@ -105,10 +106,15 @@ AppModel.prototype.SaveSettings = function ()
 AppModel.prototype.ResetSettings = function()
 {
 	//Tell main scene to drop settings
-	this.DoReset = true;
-	this.AppSettingsCurrent = this.AppSettingsDefault;
-	//Restart main scene
+	this.AppSettingsCurrent = this.AppSettingsDefaults;
+	this.SaveSettings();
+	Mojo.Log.error("reset settings");
+	
 	var stageController = Mojo.Controller.stageController;
 	stageController.popScene(this.DefaultScene);
+	Mojo.Log.error("closed scene");
+
+	//Restart main scene
 	stageController.pushScene(this.DefaultScene);
+	Mojo.Log.error("opened scene");
 }
