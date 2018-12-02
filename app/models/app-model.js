@@ -1,6 +1,6 @@
 /*
-AppModel Model
- Version 0.2
+App Model
+ Version 0.3
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -81,14 +81,14 @@ AppModel.prototype.checkSettingsValid = function (loadedSettings)
 		}
 		if (typeof this.AppSettingsDefaults[key] === "string" && this.AppSettingsDefaults[key].indexOf(this.BaseDateString) != -1 && loadedSettings[key].indexOf(this.BaseDateString))
 		{
-			Mojo.Log.error("** A saved time setting did not have the expected date value.");
+			Mojo.Log.error("** A saved setting could not be compared to an expected date value.");
 			retValue = false;
 		}
 		if (typeof this.AppSettingsDefaults[key] === "string" && (this.AppSettingsDefaults[key] == "false" || this.AppSettingsDefaults[key] == "true"))
 		{
 			if (loadedSettings[key] != "false" && loadedSettings[key] != "true")
 			{
-				Mojo.Log.error("** A saved time setting did not have the expected boolean value.");
+				Mojo.Log.error("** A saved setting did not have the expected boolean value.");
 				retValue = false;
 			}
 		}

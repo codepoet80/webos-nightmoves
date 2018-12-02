@@ -1,6 +1,6 @@
 /*
 System Model
- Version 0.2a
+ Version 0.3
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -92,6 +92,7 @@ SystemModel.prototype.ClearSystemAlarm = function(alarmName)
 	return success;
 }
 
+//Play a pre-defined system sound
 SystemModel.prototype.PlaySound = function(soundName)
 {
 	var success = true;
@@ -107,11 +108,12 @@ SystemModel.prototype.PlaySound = function(soundName)
 	return success;
 }
 
+//Vibrate the device -- TODO: Doesn't work
 SystemModel.prototype.Vibrate = function(vibePeriod, vibeDuration)
 {
 	var success = true;
 	Mojo.Log.error("Vibrating device.");
-	Mojo.Controller.getAppController().playSoundNotification("vibrate");
+	this.doVibrate();
 	//The below should work, but doesn't
 	/*this.vibeRequest = new Mojo.Service.Request("palm://com.palm.vibrate/vibrate", {
 		period: vibePeriod,
@@ -122,6 +124,7 @@ SystemModel.prototype.Vibrate = function(vibePeriod, vibeDuration)
 	return success;
 }
 
+//Allow the display to sleep
 SystemModel.prototype.AllowDisplaySleep = function ()
 {
 	var stageController = Mojo.Controller.getAppController().getActiveStageController();
@@ -134,6 +137,7 @@ SystemModel.prototype.AllowDisplaySleep = function ()
 	});
 }
 
+//Prevent the display from sleeping
 SystemModel.prototype.PreventDisplaySleep = function ()
 {
 	var stageController = Mojo.Controller.getAppController().getActiveStageController();
@@ -183,4 +187,54 @@ SystemModel.prototype.SetSystemBrightness = function (newBrightness)
         onFailure: function(response) { Mojo.Log.error("Screen brightess not set!", JSON.stringify(response)); }
     });
     return request;
+}
+
+//Show a notification window in its own small stage
+SystemModel.prototype.ShowNotificationStage = function(stageName, sceneName, heightToUse, sound, vibrate) 
+{
+	Mojo.Log.error("Showing notification stage.");
+	//Determine what sound to use
+	//TODO: accept a file name as input
+	var soundToUse = "assets/silent.mp3";
+	if (sound != false && sound != "" && sound != null)
+		soundToUse = "/media/internal/ringtones/Rain Dance.mp3"
+	if (vibrate != null)
+	{
+		if (!Number(vibrate))
+		{
+			if (vibrate == true)
+				vibeMax = 5;
+			else
+				vibeMax = 0;
+		}	
+		else
+			vibeMax = Number(vibrate);
+		if (vibeMax > 0)
+		vibeInterval = setInterval(doVibrate, 500);
+	}
+
+	var stageCallBack = function(stageController) {
+		stageController.pushScene({name: stageName, sceneTemplate: sceneName});
+	}
+	Mojo.Controller.getAppController().createStageWithCallback({
+		name: stageName, 
+		lightweight: true,
+		height: heightToUse, 
+		sound: soundToUse
+	}, stageCallBack, 'popupalert');
+}
+
+//Helper Functions
+var vibeInterval;
+var vibeCount = 0;
+var vibeMax = 5;
+doVibrate = function()
+{
+	vibeCount++;
+	Mojo.Controller.getAppController().playSoundNotification("vibrate");
+	if (vibeCount >= vibeMax)
+	{
+		clearInterval(vibeInterval);
+		vibeCount = 0;
+	}
 }

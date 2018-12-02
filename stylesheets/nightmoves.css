@@ -3,7 +3,11 @@
     background: url(../images/header-icon.png) no-repeat; background-size: 32px 32px; 
 }
 
-.settings-page { background-color: #adadac;}
 .setting-group-title { padding-left:16px; padding-bottom:5px;width:100%; }
 .setting-group-slider { margin-left: -12px; margin-top: 18px; margin-bottom: 8px; }
 .setting-group-slider-label { width:100%; margin:auto; }
+.alarmContent
+{
+    border-top:2px solid #77777a;
+    padding-top: 5px;
+}

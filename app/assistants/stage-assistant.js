@@ -44,17 +44,19 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName, running)
 {
 	var stageController = Mojo.Controller.stageController;
 
-	/*if (Mojo.Environment.DeviceInfo.platformVersionMajor>=3)
+	if (Mojo.Environment.DeviceInfo.platformVersionMajor>=3)
 	{
 		//This is a touchpad, working on using a scene to force it to awake
 		//	Unfortunately, then it stays awake...
-		var pushPopup = function(stageController)
+		systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 160, false, false);
+		/*var pushPopup = function(stageController)
 		{
 			stageController.pushScene('settings', AlarmName);
 		}
 		Mojo.Controller.getAppController().createStageWithCallback({name: "popupStage", lightweight: true, height: 200}, pushPopup, 'popupalert');
+		*/
 	}
-	else
+	/*else
 	{*/
 		this.applySettingsFromAlarm(AlarmName);
 		if (!appModel.AppSettingsCurrent.Debug)
