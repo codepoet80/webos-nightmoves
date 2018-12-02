@@ -13,7 +13,7 @@ StageAssistant.prototype.setup = function()
 	
 	//Setup App Menu
 	stageController.appMenuAttributes = {omitDefaultItems: true};
-	stageController.appMenuModel = { label: "Settings",
+		stageController.appMenuModel = { label: "Settings",
 		items: [
 			{label: "Debug", checkEnabled: true, command: 'do-toggleDebug'},
 			{label: "Reset Settings", command: 'do-resetSettings'}, 
@@ -44,7 +44,7 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName, running)
 {
 	var stageController = Mojo.Controller.stageController;
 
-	if (Mojo.Environment.DeviceInfo.platformVersionMajor>=3)
+	/*if (Mojo.Environment.DeviceInfo.platformVersionMajor>=3)
 	{
 		//This is a touchpad, working on using a scene to force it to awake
 		//	Unfortunately, then it stays awake...
@@ -55,7 +55,7 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName, running)
 		Mojo.Controller.getAppController().createStageWithCallback({name: "popupStage", lightweight: true, height: 200}, pushPopup, 'popupalert');
 	}
 	else
-	{
+	{*/
 		this.applySettingsFromAlarm(AlarmName);
 		if (!appModel.AppSettingsCurrent.Debug)
 		{
@@ -67,7 +67,7 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName, running)
 		}
 		if (!running)
 			stageController.window.close();
-	}
+	//}
 }
 
 StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
@@ -123,7 +123,8 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 		{
 			Mojo.Log.error("### Alarm debug is on, over-riding alarm time.");
 			//Seconds
-			systemModel.SetSystemAlarmRelative(alarmName, "00:00:05:00");
+			if (systemModel.SetSystemAlarmRelative(alarmName, "00:00:05:00"))
+				alarmSetResult = "Next trigger: 5 seconds (debug)";
 		}
 		else	//Fire on scheduled date time
 		{

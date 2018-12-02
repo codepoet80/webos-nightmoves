@@ -125,10 +125,7 @@ MainAssistant.prototype.timeSaved = function (event)
 	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
 	if (newTime != false)
 	{
-		if (newTime != true)
-		{
-			Mojo.Controller.getAppController().showBanner(newTime, {source: 'notification'});
-		}
+		Mojo.Controller.getAppController().showBanner(newTime, {source: 'notification'});
 	}
 }
 
@@ -216,12 +213,10 @@ MainAssistant.prototype.togglePressed = function(event){
 	Mojo.Log.error("**** Settings when toggle pressed: " + JSON.stringify(appModel.AppSettingsCurrent));
 
 	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
+	Mojo.Log.error("should show banner: " + newTime);
 	if (newTime != false)
 	{
-		if (newTime != true)
-		{
-			Mojo.Controller.getAppController().showBanner(newTime, {source: 'notification'});
-		}
+		Mojo.Controller.getAppController().showBanner(newTime, {source: 'notification'});
 	}
 }
 
