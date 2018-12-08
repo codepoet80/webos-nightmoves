@@ -13,14 +13,7 @@ AlarmAssistant.prototype.setup = function(){
 	this.quitButtonHandler = this.handleQuitButton.bind(this);
     Mojo.Event.listen(this.controller.get('quit-button'), Mojo.Event.tap, this.quitButtonHandler);
     Mojo.Log.error("notification stage setup at " + new Date());
-    setTimeout("doClose()", 2000);
-}
 
-doClose = function()
-{
-    systemModel.AllowDisplaySleep();
-    Mojo.Log.error("Closing notification window at " + new Date());
-    Mojo.Controller.appController.closeStage("alarm");
 }
 
 AlarmAssistant.prototype.handleQuitButton = function(){

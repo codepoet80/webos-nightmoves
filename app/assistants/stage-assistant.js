@@ -25,12 +25,9 @@ StageAssistant.prototype.setup = function()
 
 	//Figure out how we were launched
 	Mojo.Log.error("Nightmoves stage loaded.");
-	if (!appModel.AlarmLaunch)	//If its a normal launch, start a scene
-	{
-		Mojo.Log.error("Normal stage launch. Pushing main scene.");
-		this.controller.pushScene('main');
-	}
-	else	//If its an alarm re-launch, handle the alarm and if there's no other window close
+	Mojo.Log.error("Pushing main scene.");
+	this.controller.pushScene('main');
+	if (appModel.AlarmLaunch)	//If its an alarm re-launch, handle the alarm and if there's no other window close
 	{
 		Mojo.Log.error("Alarm stage launch. Using alarm launch.");
 		if (stageController.getScenes() > 0)
@@ -40,13 +37,17 @@ StageAssistant.prototype.setup = function()
 	}
 }
 
+var isRunning = false;
 StageAssistant.prototype.launchWithAlarm = function(AlarmName, running)
 {
+	isRunning = running;
 	var stageController = Mojo.Controller.stageController;
+	var touchpad = Mojo.Environment.DeviceInfo.platformVersionMajor>=3;
 	//If this is a touchpad, opening a scene can force it to awake
-	if (Mojo.Environment.DeviceInfo.platformVersionMajor>=3)
+	if (touchpad)
 	{
-		systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 160, false, false);
+		systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 170, false, false);
+		setTimeout("doClose(isRunning)", 2000);
 	}
 	this.applySettingsFromAlarm(AlarmName);
 	if (!appModel.AppSettingsCurrent.Debug)
@@ -54,8 +55,19 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName, running)
 	else
 		Mojo.Log.error("Not re-setting alarms, since we're in Debug mode");
 	
-	if (!running)
+	if (!running && !touchpad)
 		stageController.window.close();
+}
+
+
+doClose = function(running)
+{
+    var stageController = Mojo.Controller.appController.getStageController("");
+    systemModel.AllowDisplaySleep();
+    Mojo.Log.error("Closing notification window and main stage at " + new Date());
+	Mojo.Controller.appController.closeStage("alarm");
+	if (!running)
+    	stageController.window.close();
 }
 
 StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
