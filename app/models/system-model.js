@@ -272,7 +272,7 @@ SystemModel.prototype.SetSystemBrightness = function (newBrightness)
 SystemModel.prototype.setShowNotificationsWhenLocked = function(value) {
 	if (Mojo.Controller.appInfo.id.indexOf("com.palm.webos") != -1)
 	{
-		Mojo.Log.error("Setting Notifications When Locked to " + value);
+		Mojo.Log.info("Setting Notifications When Locked to " + value);
 		this.service_identifier = 'palm://com.palm.systemservice';
 		var request = new Mojo.Service.Request(this.service_identifier, {
 				method: 'setPreferences',
@@ -291,7 +291,7 @@ SystemModel.prototype.setShowNotificationsWhenLocked = function(value) {
 SystemModel.prototype.setLEDLightNotifications = function(value) {
 	if (Mojo.Controller.appInfo.id.indexOf("com.palm.webos") != -1)
 	{
-		Mojo.Log.error("Setting LED Notifications to " + value);
+		Mojo.Log.info("Setting LED Notifications to " + value);
 		this.service_identifier = 'palm://com.palm.systemservice';
 		var request = new Mojo.Service.Request(this.service_identifier, {
 				method: 'setPreferences',
