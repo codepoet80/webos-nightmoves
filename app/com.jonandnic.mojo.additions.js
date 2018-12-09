@@ -108,7 +108,7 @@ Additions.FindAncestorWithIdPart = function (currElement, namePartToSearch, expe
         }
         currElement = parentElement;
     }
-    Mojo.Log.debug("Discovered ancestor ids: " + parentList);
+    Mojo.Log.info("Discovered ancestor ids: " + parentList);
     return foundElement;
 }
 
