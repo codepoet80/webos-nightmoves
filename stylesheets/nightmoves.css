@@ -11,3 +11,8 @@
     border-top:2px solid #77777a;
     padding-top: 5px;
 }
+.explanation-text {
+	margin: 0px 23px 22px 23px;
+	font-size: 14px;
+	color: #666;
+}

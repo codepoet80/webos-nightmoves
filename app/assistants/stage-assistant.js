@@ -11,17 +11,6 @@ StageAssistant.prototype.setup = function()
 	stageController.manageAllAlarms = this.manageAllAlarms;
 	stageController.launchWithAlarm = this.launchWithAlarm;
 	stageController.applySettingsFromAlarm = this.applySettingsFromAlarm;
-	
-	//Setup App Menu
-	stageController.appMenuAttributes = {omitDefaultItems: true};
-		stageController.appMenuModel = { label: "Settings",
-		items: [
-			{label: "Debug", checkEnabled: true, command: 'do-toggleDebug'},
-			{label: "Reset Settings", command: 'do-resetSettings'}, 
-			{label: "About Night Moves", command: 'do-myAbout'}
-		]
-	};
-	appModel.LoadSettings();
 
 	//Figure out how we were launched
 	Mojo.Log.info("Nightmoves stage loaded.");
@@ -80,9 +69,38 @@ StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 	Mojo.Log.info(new Date() + " - Applying settings...");
 	//Tell user what's happening
 	var showSettingName;
-	if (settingName == "Morn") { showSettingName = "morning"; };
-	if (settingName == "Eve") { showSettingName = "evening"; };
-	if (settingName == "Nite") { showSettingName = "night"; };
+	if (settingName == "Morn") 
+	{ 
+		showSettingName = "morning"; 
+		if (appModel.AppSettingsCurrent["NotificationOptionEnabled"] == "true")
+		{
+			systemModel.setShowNotificationsWhenLocked(true);
+			systemModel.setLEDLightNotifications(true);
+		}
+		if (appModel.AppSettingsCurrent["DataOptionEnabled"] == "true")
+		{
+			systemModel.setWANEnabled(true);
+			systemModel.setWifiEnabled(true);
+		}
+	};
+	if (settingName == "Eve") 
+	{ 
+		showSettingName = "evening"; 
+	};
+	if (settingName == "Nite") 
+	{ 
+		showSettingName = "night"; 
+		if (appModel.AppSettingsCurrent["NotificationOptionEnabled"] == "true")
+		{
+			systemModel.setShowNotificationsWhenLocked(false);
+			systemModel.setLEDLightNotifications(false);
+		}
+		if (appModel.AppSettingsCurrent["DataOptionEnabled"] == "true")
+		{
+			systemModel.setWANEnabled(false);
+			systemModel.setWifiEnabled(false);
+		}
+	};
 	Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
 	
 	//Apply the settings
@@ -216,7 +234,16 @@ StageAssistant.prototype.handleCommand = function(event) {
 					appModel.AppSettingsCurrent.Debug = false;
 				else
 					appModel.AppSettingsCurrent.Debug = true;
-				appController.showBanner("Debug mode " + appModel.AppSettingsCurrent.Debug, {source: 'notification'});
+				appController.showBanner("Debug mode: " + appModel.AppSettingsCurrent.Debug, {source: 'notification'});
+				stageController.popScene();
+				stageController.pushScene("main");
+				break;
+			case 'do-togglePrecision':
+				if (appModel.AppSettingsCurrent.PreciseTimers == true)
+					appModel.AppSettingsCurrent.PreciseTimers = false;
+				else
+					appModel.AppSettingsCurrent.PreciseTimers = true;
+				appController.showBanner("Using precision timers: " + appModel.AppSettingsCurrent.PreciseTimers, {source: 'notification'});
 				stageController.popScene();
 				stageController.pushScene("main");
 				break;

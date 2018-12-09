@@ -18,8 +18,11 @@ var AppModel = function()
 	this.AppSettingsCurrent = null;
 	//Define cookie defaults here and they will be loaded and enforced below
     this.AppSettingsDefaults = {
-		Debug: false,
 		FirstRun: true,
+		Debug: false,
+		PreciseTimers: false,
+		NotificationOptionEnabled: 'false',
+		DataOptionEnabled: 'false',
         MornEnabled: 'false',
         MornStart: this.BaseDateString + "06:00:00",
         MornBright: 90,

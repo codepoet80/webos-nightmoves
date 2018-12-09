@@ -12,7 +12,7 @@
             },
             "problemMatcher": [],
             "group": {
-                "kind": "build",
+                "kind": "test",
                 "isDefault": true
             },
             "presentation": {
@@ -29,6 +29,65 @@
             },
             "problemMatcher": [],
             "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "palm-log level: info",
+            "type": "shell",
+            "command": "./.vscode/logging.sh",
+            "windows": {
+                "command": ""
+            },
+            "args": ["info"],
+            "problemMatcher": [],
+            "group": "none",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "palm-log level: error",
+            "type": "shell",
+            "command": "./.vscode/logging.sh",
+            "windows": {
+                "command": ""
+            },
+            "args": ["error"],
+            "problemMatcher": [],
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "nova-browser",
+            "type": "shell",
+            "command": "/opt/PalmPDK/bin/nova-browser",
+            "windows": {
+                "command": ""
+            },
+            "problemMatcher": [],
+            "group": "none",
+            "presentation": {
+                "reveal": "never",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "nova-term",
+            "type": "shell",
+            "command": "/opt/nova/bin/novaterm",
+            "windows": {
+                "command": ""
+            },
+            "problemMatcher": [],
+            "group": "none",
             "presentation": {
                 "reveal": "always",
                 "panel": "dedicated"

@@ -7,13 +7,31 @@ MainAssistant.prototype.setup = function()
 {
 	appModel.LoadSettings();
 	Mojo.Log.info("** Loaded Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
+	var stageController = Mojo.Controller.stageController;
+
+	//Setup App Menu
+	stageController.appMenuAttributes = {omitDefaultItems: true};
+		stageController.appMenuModel = { label: "Settings",
+		items: [
+			{label: ('Advanced'),
+				items: [
+					{label: "Debug Timers", checkEnabled: true, command: 'do-toggleDebug', chosen:appModel.AppSettingsCurrent.Debug },
+					{label: "Precise Timers", checkEnabled: true, command: 'do-togglePrecision', chosen:appModel.AppSettingsCurrent.PreciseTimers }
+				]
+			},
+			{label: "Reset Settings", command: 'do-resetSettings'}, 
+			{label: "About Night Moves", command: 'do-myAbout'}
+		]
+	};
 	
 	//Setup toggles
 	this.timeTapped = this.timeTapped.bind(this);
-	this.setupToggle('Morn', appModel.AppSettingsCurrent);
-	this.setupToggle('Eve', appModel.AppSettingsCurrent);
-	this.setupToggle('Nite', appModel.AppSettingsCurrent);
-	
+	this.setupTimeToggle('Morn', appModel.AppSettingsCurrent["MornEnabled"], appModel.AppSettingsCurrent["MornStart"]);
+	this.setupTimeToggle('Eve', appModel.AppSettingsCurrent["EveEnabled"], appModel.AppSettingsCurrent["EveStart"]);
+	this.setupTimeToggle('Nite', appModel.AppSettingsCurrent["NiteEnabled"], appModel.AppSettingsCurrent["NiteStart"]);
+	this.setupToggle('NotificationOption', appModel.AppSettingsCurrent["NotificationOptionEnabled"]);
+	this.setupToggle('DataOption', appModel.AppSettingsCurrent["DataOptionEnabled"]);
+
 	//Setup sliders
 	this.sliderChanged = this.sliderChanged.bind(this);
 	this.setupSlider("MornBright", appModel.AppSettingsCurrent);
@@ -30,10 +48,16 @@ MainAssistant.prototype.setup = function()
 	this.setupTimePicker("Nite", appModel.AppSettingsCurrent);
 
 	//App Menu (handled in stage controller: stage-assistant.js)
-	this.controller.setupWidget(Mojo.Menu.appMenu, Mojo.Controller.stageController.appMenuAttributes, Mojo.Controller.stageController.appMenuModel);
+	this.controller.setupWidget(Mojo.Menu.appMenu, stageController.appMenuAttributes, stageController.appMenuModel);
+
+	if (appModel.AppSettingsCurrent["Debug"])
+		document.getElementById("txtExplainDebugMode").style.display = "block";
+	else
+		document.getElementById("txtExplainDebugMode").style.display = "none";
 
 	//With each launch, maybe we should re-establish alarms, in order to "self-heal"
-	Mojo.Controller.stageController.manageAllAlarms(appModel.AppSettingsCurrent);
+	if(appModel.AppSettingsCurrent.Debug == false)
+	stageController.manageAllAlarms(appModel.AppSettingsCurrent);
 }
 
 MainAssistant.prototype.activate = function(event) {
@@ -74,7 +98,7 @@ MainAssistant.prototype.setupTimePicker = function (hiddenDivName, settings) {
 	var dateString = appModel.AppSettingsCurrent[hiddenDivName + "Start"];
 	var useTime = new Date(dateString);
 	var minuteInterval = 5;
-	if (appModel.AppSettingsCurrent.Debug)
+	if (appModel.AppSettingsCurrent.PreciseTimers)
 		minuteInterval = 1;
 	this.controller.setupWidget("timePicker" + hiddenDivName,
 	this.attributes = {
@@ -177,7 +201,16 @@ MainAssistant.prototype.sliderChanged = function(event){
 	Mojo.Log.info("**** Settings after slider changed: " + JSON.stringify(appModel.AppSettingsCurrent));
 }
 
-MainAssistant.prototype.setupToggle = function (toggleName, settings)
+MainAssistant.prototype.setupTimeToggle = function (toggleName, toggleValue, timeValue)
+{
+	this.setupToggle(toggleName, toggleValue);
+
+	var labelName = toggleName + "TimeLabel";
+	this.updateTimeLabel(toggleName, timeValue);
+	Mojo.Event.listen(this.controller.get(labelName), Mojo.Event.tap, this.timeTapped);
+}
+
+MainAssistant.prototype.setupToggle = function (toggleName, toggleValue)
 {
 	this.attribute = {
 		trueLabel:  'on',
@@ -187,32 +220,35 @@ MainAssistant.prototype.setupToggle = function (toggleName, settings)
 		fieldName:  'toggle'
 	}
 	this.model = {
-		value : settings[toggleName + "Enabled"],
+		value : toggleValue,
 		disabled: false 
 	}
 	this.controller.setupWidget('att-toggle-' + toggleName, this.attribute, this.model);
-
 	this.togglePressed = this.togglePressed.bind(this);
 	Mojo.Event.listen(this.controller.get('att-toggle-' + toggleName), Mojo.Event.propertyChange, this.togglePressed);
-	var labelName = toggleName + "TimeLabel";
-	var tdName = toggleName + "TimeTD";
-	this.updateTimeLabel(toggleName, settings[toggleName + "Start"]);
-	Mojo.Event.listen(this.controller.get(labelName), Mojo.Event.tap, this.timeTapped);
 }
 
-MainAssistant.prototype.togglePressed = function(event){
+MainAssistant.prototype.togglePressed = function(event)
+{
+	//Change the value in settings
 	var findSettingName = event.srcElement.id.replace("att-toggle-", "");
 	findSettingName = findSettingName;
-
+	Mojo.Log.info("toggle setting: " + findSettingName);
 	appModel.AppSettingsCurrent[findSettingName + "Enabled"] = event.value.toString();
 	appModel.SaveSettings();
 	Mojo.Log.info("**** Settings when toggle pressed: " + JSON.stringify(appModel.AppSettingsCurrent));
 
-	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
-	Mojo.Log.info("should show banner: " + newTime);
-	if (newTime != false)
+	if (event.srcElement.id.indexOf("Option") != -1)	//This is an option toggle
 	{
-		Mojo.Controller.getAppController().showBanner(newTime, {source: 'notification'});
+		Mojo.Controller.getAppController().showBanner(findSettingName + " is " + event.value, {source: 'notification'});
+	}
+	else	//This is a time toggle
+	{
+		var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
+		if (newTime != false)
+		{
+			Mojo.Controller.getAppController().showBanner(newTime, {source: 'notification'});
+		}
 	}
 }
 
