@@ -1,6 +1,6 @@
 /*
 System Model
- Version 0.3a
+ Version 0.3b
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -11,11 +11,11 @@ var SystemModel = function() {
 
 };
 
-//Create a named System Alarm using an absolute time
-SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
+//Create a named System Alarm
+SystemModel.prototype.SetSystemAlarm = function(alarmName, alarmTime)
 {
 	var success = true;
-    Mojo.Log.error("Setting absolute alarm time: " + alarmTime);
+    Mojo.Log.info("Setting absolute alarm time: " + alarmTime);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
 		parameters: {
@@ -29,37 +29,7 @@ SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 			}
 		},
 		onSuccess: function(response) {
-			Mojo.Log.error("Alarm Set Success", JSON.stringify(response));
-			success = true;
-		},
-		onFailure: function(response) {
-			Mojo.Log.error("Alarm Set Failure",
-				JSON.stringify(response), response.errorText);
-			success = false;
-		}
-	});
-	return success;
-}
-
-//Create a named System Alarm using a relative time
-SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
-{
-	var success = true;
-    Mojo.Log.error("Setting relative alarm time: " + alarmTime);
-    this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
-		method: "set",
-		parameters: {
-			"key": Mojo.Controller.appInfo.id + "-" + alarmName,
-			"in": alarmTime,
-			"wakeup": true,
-			"uri": "palm://com.palm.applicationManager/open",
-			"params": {
-				"id": Mojo.Controller.appInfo.id,
-				"params": {"action": alarmName}
-			}
-		},
-		onSuccess: function(response) {
-			Mojo.Log.error("Alarm Set Success", JSON.stringify(response));
+			Mojo.Log.info("Alarm Set Success", JSON.stringify(response));
 			success = true;
 		},
 		onFailure: function(response) {
@@ -75,12 +45,12 @@ SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 SystemModel.prototype.ClearSystemAlarm = function(alarmName)
 {
 	var success = true;
-    Mojo.Log.error("Clearing alarm: " + alarmName);
+    Mojo.Log.info("Clearing alarm: " + alarmName);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "clear",
 		parameters: {"key": Mojo.Controller.appInfo.id + "-" + alarmName},
 		onSuccess: function(response) {
-			Mojo.Log.error("Alarm Clear Success", JSON.stringify(response));
+			Mojo.Log.info("Alarm Clear Success", JSON.stringify(response));
 			success = true;
 		},
 		onFailure: function(response) {
@@ -96,7 +66,7 @@ SystemModel.prototype.ClearSystemAlarm = function(alarmName)
 SystemModel.prototype.PlaySound = function(soundName)
 {
 	var success = true;
-	Mojo.Log.error("Playing sound: " + soundName);
+	Mojo.Log.info("Playing sound: " + soundName);
 	this.soundRequest = new Mojo.Service.Request("palm://com.palm.audio/systemsounds", {
 		method: "playFeedback",
 		parameters: {
@@ -112,7 +82,7 @@ SystemModel.prototype.PlaySound = function(soundName)
 SystemModel.prototype.Vibrate = function(vibePeriod, vibeDuration)
 {
 	var success = true;
-	Mojo.Log.error("Vibrating device.");
+	Mojo.Log.info("Vibrating device.");
 	this.doVibrate();
 	//The below should work, but doesn't
 	/*this.vibeRequest = new Mojo.Service.Request("palm://com.palm.vibrate/vibrate", {
@@ -157,7 +127,7 @@ SystemModel.prototype.SetSystemVolume = function (newVolume)
     var request = new Mojo.Service.Request(this.service_identifier, {
         method: 'setVolume',
         parameters: {volume: newVolume },
-        onSuccess: function(response) { Mojo.Log.error("System volume set to " + newVolume ); },
+        onSuccess: function(response) { Mojo.Log.info("System volume set to " + newVolume ); },
         onFailure: function(response) { Mojo.Log.error("System volume not set!", JSON.stringify(response)); }		
     });
     return request;
@@ -170,7 +140,7 @@ SystemModel.prototype.SetRingtoneVolume = function (newVolume)
     var request = new Mojo.Service.Request(this.service_identifier, {
         method: 'setVolume',
         parameters: {volume: newVolume },
-        onSuccess: function(response) { Mojo.Log.error("Ringtone volume set to " + newVolume); },
+        onSuccess: function(response) { Mojo.Log.info("Ringtone volume set to " + newVolume); },
         onFailure: function(response) { Mojo.Log.error("Ringtone volume not set!", JSON.stringify(response)); }		
     });
     return request;
@@ -183,7 +153,7 @@ SystemModel.prototype.SetSystemBrightness = function (newBrightness)
     var request = new Mojo.Service.Request(this.service_identifier, {
         method: 'setProperty',
         parameters:{maximumBrightness: newBrightness},
-        onSuccess: function(response) { Mojo.Log.error("Screen brightness set! to " + newBrightness); },
+        onSuccess: function(response) { Mojo.Log.info("Screen brightness set! to " + newBrightness); },
         onFailure: function(response) { Mojo.Log.error("Screen brightess not set!", JSON.stringify(response)); }
     });
     return request;
@@ -192,7 +162,7 @@ SystemModel.prototype.SetSystemBrightness = function (newBrightness)
 //Show a notification window in its own small stage
 SystemModel.prototype.ShowNotificationStage = function(stageName, sceneName, heightToUse, sound, vibrate) 
 {
-	Mojo.Log.error("Showing notification stage.");
+	Mojo.Log.info("Showing notification stage.");
 	//Determine what sound to use
 	//TODO: accept a file name as input
 	var soundToUse = "assets/silent.mp3";

@@ -52,7 +52,7 @@ AppModel.prototype.LoadSettings = function () {
 		else
 		{
 			Mojo.Log.error("** Using cookie settings!");
-            Mojo.Log.error(JSON.stringify(appSettings))
+            Mojo.Log.info(JSON.stringify(appSettings))
             this.AppSettingsCurrent = appSettings;
             loadSuccess = true;
 		}
@@ -82,14 +82,14 @@ AppModel.prototype.checkSettingsValid = function (loadedSettings)
 		}
 		if (typeof this.AppSettingsDefaults[key] === "string" && this.AppSettingsDefaults[key].indexOf(this.BaseDateString) != -1 && loadedSettings[key].indexOf(this.BaseDateString))
 		{
-			Mojo.Log.error("** A saved setting could not be compared to an expected date value.");
+			Mojo.Log.warn("** A saved setting could not be compared to an expected date value.");
 			retValue = false;
 		}
 		if (typeof this.AppSettingsDefaults[key] === "string" && (this.AppSettingsDefaults[key] == "false" || this.AppSettingsDefaults[key] == "true"))
 		{
 			if (loadedSettings[key] != "false" && loadedSettings[key] != "true")
 			{
-				Mojo.Log.error("** A saved setting did not have the expected boolean value.");
+				Mojo.Log.warn("** A saved setting did not have the expected boolean value.");
 				retValue = false;
 			}
 		}
@@ -108,13 +108,13 @@ AppModel.prototype.ResetSettings = function()
 	//Tell main scene to drop settings
 	this.AppSettingsCurrent = this.AppSettingsDefaults;
 	this.SaveSettings();
-	Mojo.Log.error("reset settings");
+	Mojo.Log.info("reset settings");
 	
 	var stageController = Mojo.Controller.stageController;
 	stageController.popScene(this.DefaultScene);
-	Mojo.Log.error("closed scene");
+	Mojo.Log.info("closed default scene");
 
 	//Restart main scene
 	stageController.pushScene(this.DefaultScene);
-	Mojo.Log.error("opened scene");
+	Mojo.Log.info("re-opened default scene");
 }

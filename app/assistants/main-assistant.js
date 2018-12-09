@@ -6,7 +6,7 @@ function MainAssistant() {
 MainAssistant.prototype.setup = function()
 {
 	appModel.LoadSettings();
-	Mojo.Log.error("** Loaded Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
+	Mojo.Log.info("** Loaded Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
 	
 	//Setup toggles
 	this.timeTapped = this.timeTapped.bind(this);
@@ -33,12 +33,10 @@ MainAssistant.prototype.setup = function()
 	this.controller.setupWidget(Mojo.Menu.appMenu, Mojo.Controller.stageController.appMenuAttributes, Mojo.Controller.stageController.appMenuModel);
 
 	//With each launch, maybe we should re-establish alarms, in order to "self-heal"
-	//Mojo.Controller.stageController.manageAllAlarms(appModel.AppSettingsCurrent);
+	Mojo.Controller.stageController.manageAllAlarms(appModel.AppSettingsCurrent);
 }
 
 MainAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	example, key handlers that are observing the document */
 
 	document.body.className = "palm-default";
 
@@ -50,7 +48,7 @@ MainAssistant.prototype.activate = function(event) {
 	//Welcome new users
 	if (appModel.AppSettingsCurrent["FirstRun"] == true)
 	{	
-		Mojo.Log.error("** Using first run default settings");
+		Mojo.Log.info("** Using first run default settings");
 		appModel.AppSettingsCurrent["FirstRun"] = false;
 		appModel.SaveSettings();
 		var welcomeMessage = "With this app, you can configure the settings you want your webOS device to be set to at different times in the day. Default settings have been loaded to get things started.";
@@ -118,7 +116,7 @@ MainAssistant.prototype.timeSaved = function (event)
 	appModel.SaveSettings();
 	this.updateTimeLabel(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"]);
 	
-	Mojo.Log.error("**** Settings when time saved: " + JSON.stringify(appModel.AppSettingsCurrent));
+	Mojo.Log.info("**** Settings when time saved: " + JSON.stringify(appModel.AppSettingsCurrent));
 	this.controller.get("drawer" + findSettingName).mojo.toggleState();
 	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
 	if (newTime != false)
@@ -176,7 +174,7 @@ MainAssistant.prototype.sliderChanged = function(event){
 
 	appModel.AppSettingsCurrent[settingName] = event.value;
 	appModel.SaveSettings();
-	Mojo.Log.error("**** Settings after slider changed: " + JSON.stringify(appModel.AppSettingsCurrent));
+	Mojo.Log.info("**** Settings after slider changed: " + JSON.stringify(appModel.AppSettingsCurrent));
 }
 
 MainAssistant.prototype.setupToggle = function (toggleName, settings)
@@ -208,10 +206,10 @@ MainAssistant.prototype.togglePressed = function(event){
 
 	appModel.AppSettingsCurrent[findSettingName + "Enabled"] = event.value.toString();
 	appModel.SaveSettings();
-	Mojo.Log.error("**** Settings when toggle pressed: " + JSON.stringify(appModel.AppSettingsCurrent));
+	Mojo.Log.info("**** Settings when toggle pressed: " + JSON.stringify(appModel.AppSettingsCurrent));
 
 	var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
-	Mojo.Log.error("should show banner: " + newTime);
+	Mojo.Log.info("should show banner: " + newTime);
 	if (newTime != false)
 	{
 		Mojo.Controller.getAppController().showBanner(newTime, {source: 'notification'});
@@ -232,9 +230,9 @@ MainAssistant.prototype.deactivate = function(event) {
 	Mojo.Event.stopListening(this.controller.get('sldNiteVolume'), Mojo.Event.propertyChanged, this.sliderChanged);
 
 	//Save settings
-	Mojo.Log.error("Night moves is being deactivated.");
+	Mojo.Log.info("Night moves is being deactivated.");
 	appModel.SaveSettings();
-	Mojo.Log.error("** Saved Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
+	Mojo.Log.info("** Saved Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
 }
 
 MainAssistant.prototype.cleanup = function(event) {
