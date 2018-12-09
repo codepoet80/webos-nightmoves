@@ -21,7 +21,6 @@ StageAssistant.prototype.setup = function()
 			{label: "About Night Moves", command: 'do-myAbout'}
 		]
 	};
-	
 	appModel.LoadSettings();
 
 	//Figure out how we were launched
@@ -30,16 +29,18 @@ StageAssistant.prototype.setup = function()
 	if (appModel.AlarmLaunch)	//If its an alarm re-launch, handle the alarm and if there's no other window close
 	{
 		Mojo.Log.info("Alarm stage launch. Using alarm launch.");
-		if (stageController.getScenes() > 0)	//Determine if we were already running or not
-			alreadyRunning = true;
-		else
-			alreadyRunning = false;
 		this.launchWithAlarm(appModel.AlarmLaunchName);
 	}
 }
 
 StageAssistant.prototype.launchWithAlarm = function(AlarmName)
 {
+	var stageController = Mojo.Controller.stageController;
+	if (stageController.getScenes().length > 0)	//Determine if we were already running or not
+		alreadyRunning = true;
+	else
+		alreadyRunning = false;
+
 	var stageController = Mojo.Controller.stageController;
 	var touchpad = Mojo.Environment.DeviceInfo.platformVersionMajor>=3;
 	if (touchpad)
@@ -62,12 +63,15 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName)
 doClose = function()
 {
     var stageController = Mojo.Controller.appController.getStageController("");
-    Mojo.Log.info("Closing notification window and main stage at " + new Date());
+    Mojo.Log.info("Closing notification window at " + new Date() + " running is " + alreadyRunning);
 
 	systemModel.AllowDisplaySleep();
 	Mojo.Controller.appController.closeStage("alarm");
 	if (!alreadyRunning)
-    	stageController.window.close();
+	{
+		Mojo.Log.info("Closing main window at " + new Date() + " running is " + alreadyRunning);
+		stageController.window.close();
+	}
 }
 
 //Do the actual night moves associated with this alarm

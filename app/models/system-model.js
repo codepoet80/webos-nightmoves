@@ -11,8 +11,38 @@ var SystemModel = function() {
 
 };
 
-//Create a named System Alarm
-SystemModel.prototype.SetSystemAlarm = function(alarmName, alarmTime)
+//Create a named System Alarm using relative time ("in")
+SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
+{
+	var success = true;
+    Mojo.Log.info("Setting relative alarm time: " + alarmTime);
+    this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
+		method: "set",
+		parameters: {
+			"key": Mojo.Controller.appInfo.id + "-" + alarmName,
+			"in": alarmTime,
+			"wakeup": true,
+			"uri": "palm://com.palm.applicationManager/open",
+			"params": {
+				"id": Mojo.Controller.appInfo.id,
+				"params": {"action": alarmName}
+			}
+		},
+		onSuccess: function(response) {
+			Mojo.Log.info("Alarm Set Success", JSON.stringify(response));
+			success = true;
+		},
+		onFailure: function(response) {
+			Mojo.Log.error("Alarm Set Failure",
+				JSON.stringify(response), response.errorText);
+			success = false;
+		}
+	});
+	return success;
+}
+
+//Create a named System Alarm using absolute time ("at")
+SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 {
 	var success = true;
     Mojo.Log.info("Setting absolute alarm time: " + alarmTime);
@@ -79,18 +109,22 @@ SystemModel.prototype.PlaySound = function(soundName)
 }
 
 //Vibrate the device -- TODO: Doesn't work
-SystemModel.prototype.Vibrate = function(vibePeriod, vibeDuration)
+SystemModel.prototype.Vibrate = function(vibrate)
 {
 	var success = true;
 	Mojo.Log.info("Vibrating device.");
-	this.doVibrate();
-	//The below should work, but doesn't
-	/*this.vibeRequest = new Mojo.Service.Request("palm://com.palm.vibrate/vibrate", {
-		period: vibePeriod,
-		duration: vibeDuration,
-		onSuccess:function() { success = true; },
-		onFailure:function() { success = false; }
-	});*/
+	if (!Number(vibrate))
+	{
+		if (vibrate == true)
+			vibeMax = 1;
+		else
+			vibeMax = 0;
+	}	
+	else
+		vibeMax = Number(vibrate);
+	if (vibeMax > 0)
+		vibeInterval = setInterval(doVibrate, 500);
+
 	return success;
 }
 
@@ -169,19 +203,7 @@ SystemModel.prototype.ShowNotificationStage = function(stageName, sceneName, hei
 	if (sound != false && sound != "" && sound != null)
 		soundToUse = "/media/internal/ringtones/Rain Dance.mp3"
 	if (vibrate != null)
-	{
-		if (!Number(vibrate))
-		{
-			if (vibrate == true)
-				vibeMax = 5;
-			else
-				vibeMax = 0;
-		}	
-		else
-			vibeMax = Number(vibrate);
-		if (vibeMax > 0)
-		vibeInterval = setInterval(doVibrate, 500);
-	}
+		this.Vibrate(vibrate);
 
 	var stageCallBack = function(stageController) {
 		stageController.pushScene({name: stageName, sceneTemplate: sceneName});
@@ -202,10 +224,18 @@ var vibeMax = 5;
 doVibrate = function()
 {
 	vibeCount++;
-	Mojo.Controller.getAppController().playSoundNotification("vibrate");
+	Mojo.Controller.getAppController().playSoundNotification("vibrate");	//Work-around because vibrate function (see below) doesn't work
 	if (vibeCount >= vibeMax)
 	{
 		clearInterval(vibeInterval);
 		vibeCount = 0;
 	}
+
+	//The below should work, but doesn't
+	/*this.vibeRequest = new Mojo.Service.Request("palm://com.palm.vibrate/vibrate", {
+		period: vibePeriod,
+		duration: vibeDuration,
+		onSuccess:function() { success = true; },
+		onFailure:function() { success = false; }
+	});*/
 }

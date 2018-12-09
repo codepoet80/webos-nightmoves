@@ -51,7 +51,7 @@ AppModel.prototype.LoadSettings = function () {
 		}
 		else
 		{
-			Mojo.Log.error("** Using cookie settings!");
+			Mojo.Log.info("** Using cookie settings!");
             Mojo.Log.info(JSON.stringify(appSettings))
             this.AppSettingsCurrent = appSettings;
             loadSuccess = true;
