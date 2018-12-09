@@ -1,6 +1,6 @@
 /*
 Mojo Additions
- Version 0.3c
+ Version 0.3d
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -108,7 +108,7 @@ Additions.FindAncestorWithIdPart = function (currElement, namePartToSearch, expe
         }
         currElement = parentElement;
     }
-    Mojo.Log.error("Discovered ancestor ids: " + parentList);
+    Mojo.Log.debug("Discovered ancestor ids: " + parentList);
     return foundElement;
 }
 
