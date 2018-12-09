@@ -8,6 +8,8 @@ function AppAssistant(appController) {
 
 //This function will handle relaunching the app when an alarm goes off(see the device/alarm scene)
 AppAssistant.prototype.handleLaunch = function(params) {
+	appModel.LoadSettings();
+	Mojo.Log.info("** App Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
 
 	Mojo.Log.info("Night Moves App is Launching");
 	if (!params || params["action"] == undefined)	//If no parameters were passed, this is a normal launch

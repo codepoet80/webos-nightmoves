@@ -6,7 +6,7 @@ function MainAssistant() {
 MainAssistant.prototype.setup = function()
 {
 	appModel.LoadSettings();
-	Mojo.Log.info("** Loaded Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
+	Mojo.Log.info("** Stage Loaded Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
 	var stageController = Mojo.Controller.stageController;
 
 	//Setup App Menu
