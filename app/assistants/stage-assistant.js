@@ -17,7 +17,7 @@ StageAssistant.prototype.setup = function()
 	this.controller.pushScene('main');
 	if (appModel.AlarmLaunch)	//If its an alarm re-launch, handle the alarm and if there's no other window close
 	{
-		Mojo.Log.info("Alarm stage launch. Using alarm launch.");
+		Mojo.Log.warn("Alarm stage launch at " + new Date() + ". Using alarm launch: " + appModel.AlarmLaunchName);
 		this.launchWithAlarm(appModel.AlarmLaunchName);
 	}
 }
@@ -111,7 +111,7 @@ StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 
 StageAssistant.prototype.manageAllAlarms = function(appSettings, currentAlarmName)
 {
-	Mojo.Log.info("Night Moves is re-establishing all alarms.");
+	Mojo.Log.warn("Night Moves is re-establishing all alarms.");
 
 	this.manageAlarm("Morn", null, false);
 	if (appSettings["MornEnabled"])
@@ -127,6 +127,13 @@ StageAssistant.prototype.manageAllAlarms = function(appSettings, currentAlarmNam
 //This gnarly function actually sets the alarms. Depending on how far out the next alarm time is, we might need an absolute or relative alarm.
 StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnabled, forceAbsolute)
 {
+	//Clear out the alarm every time
+	if (systemModel.ClearSystemAlarm(alarmName))
+		Mojo.Log.warn("Cleared alarm: " + alarmName);
+	else
+		Mojo.Log.error("Could not clear alarm: " + alarmName);
+
+	//If the alarm is on, set it again
 	var alarmSetResult = false;
 	if (alarmEnabled == "true" || alarmEnabled == true)	//If the alarm is on
 	{
@@ -188,6 +195,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 				if (!success)
 				{
 					Mojo.showAlertDialog("Error", "A relative alarm could not be set.");
+					Mojo.Log.error("A relative alarm could not be set!");
 				}
 				else
 				{
@@ -206,6 +214,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 				if (!success)
 				{
 					Mojo.showAlertDialog("Error", "An absolute alarm could not be set");
+					Mojo.Log.error("An absolute alarm could not be set!");
 				}
 				else
 				{
@@ -214,10 +223,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 			}
 		}
 	}
-	else 	//If the alarm is off
-	{
-		success = systemModel.ClearSystemAlarm(alarmName);
-	}
+	Mojo.Log.warn("Alarm set result, " + alarmSetResult);
 	return alarmSetResult;
 }
 

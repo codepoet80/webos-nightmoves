@@ -6,9 +6,11 @@
         {
             "label": "palm-run",
             "type": "shell",
-            "command": "./.vscode/run.sh",
+            "command": "palm-run",
+            "args": ["${workspaceFolder}"],
             "windows": {
-                "command": ".\\.vscode\\run.bat"
+                "command": "palm-run",
+                "args": ["${workspaceFolder}"]
             },
             "problemMatcher": [],
             "group": {
@@ -23,9 +25,11 @@
         {
             "label": "palm-build",
             "type": "shell",
-            "command": "./.vscode/build.sh",
+            "command": "palm-package",
+            "args": ["${workspaceFolder}", "-o", "${workspaceFolder}/_bin"],
             "windows": {
-                "command": ".\\.vscode\\build.bat"
+                "command": "palm-package",
+                "args": ["${workspaceFolder}", "-o", "${workspaceFolder}/_bin"],
             },
             "problemMatcher": [],
             "group": "build",
@@ -37,11 +41,29 @@
         {
             "label": "palm-log level: info",
             "type": "shell",
-            "command": "./.vscode/logging.sh",
+            "command": "palm-log",
+            "args": ["--system-log-level", "info"],
             "windows": {
-                "command": ""
+                "command": "palm-log",
+                "args": ["--system-log-level", "info"]
             },
-            "args": ["info"],
+            "problemMatcher": [],
+            "group": "none",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "palm-log level: warn",
+            "type": "shell",
+            "command": "palm-log",
+            "args": ["--system-log-level", "warn"],
+            "windows": {
+                "command": "palm-log",
+                "args": ["--system-log-level", "warn"]
+            },
             "problemMatcher": [],
             "group": "none",
             "isBackground": true,
@@ -53,11 +75,12 @@
         {
             "label": "palm-log level: error",
             "type": "shell",
-            "command": "./.vscode/logging.sh",
+            "command": "palm-log",
+            "args": ["--system-log-level", "error"],
             "windows": {
-                "command": ""
+                "command": "palm-log",
+                "args": ["--system-log-level", "error"]
             },
-            "args": ["error"],
             "problemMatcher": [],
             "group": "none",
             "presentation": {
@@ -70,7 +93,8 @@
             "type": "shell",
             "command": "/opt/PalmPDK/bin/nova-browser",
             "windows": {
-                "command": ""
+                "command": "java",
+                "args": ["-jar", "C:\\Program Files (x86)\\HP webOS\\PDK\\share\\jars\\DeviceBrowser.jar"]
             },
             "problemMatcher": [],
             "group": "none",
@@ -84,7 +108,8 @@
             "type": "shell",
             "command": "/opt/nova/bin/novaterm",
             "windows": {
-                "command": ""
+                "command": "C:\\Program Files (x86)\\HP webOS\\SDK\\bin\\novacom.exe",
+                "args": ["-t", "open", "tty://"]
             },
             "problemMatcher": [],
             "group": "none",
