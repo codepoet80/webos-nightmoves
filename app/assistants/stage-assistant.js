@@ -42,7 +42,7 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName)
 		Mojo.Log.warn("alarm time " + alarmTime + " and " + today + " delta is " + alarmDelta);
 	}*/
 	
-	if (today.setMinutes(today.getMinutes()+1).getTime() >= alarmTime.getTime())
+	if (today.setMinutes(today.getMinutes()+1) >= alarmTime.getTime())
 	{
 		Mojo.Log.warn("This is the right time for this alarm!");
 		var stageController = Mojo.Controller.stageController;
