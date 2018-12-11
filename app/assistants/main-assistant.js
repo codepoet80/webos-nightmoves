@@ -56,8 +56,8 @@ MainAssistant.prototype.setup = function()
 		document.getElementById("txtExplainDebugMode").style.display = "none";
 
 	//With each launch, maybe we should re-establish alarms, in order to "self-heal"
-	if(appModel.AppSettingsCurrent.Debug == false)
-	stageController.manageAllAlarms(appModel.AppSettingsCurrent);
+	if(!appModel.AppSettingsCurrent.Debug && !appModel.AlarmLaunch)
+		stageController.manageAllAlarms(appModel.AppSettingsCurrent);
 }
 
 MainAssistant.prototype.activate = function(event) {
