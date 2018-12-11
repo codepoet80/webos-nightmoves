@@ -24,29 +24,41 @@ StageAssistant.prototype.setup = function()
 
 StageAssistant.prototype.launchWithAlarm = function(AlarmName)
 {
-	var stageController = Mojo.Controller.stageController;
-	if (stageController.getScenes().length > 0)	//Determine if we were already running or not
-		alreadyRunning = true;
-	else
-		alreadyRunning = false;
-
-	var stageController = Mojo.Controller.stageController;
-	var touchpad = Mojo.Environment.DeviceInfo.platformVersionMajor>=3;
-	if (touchpad)
+	//var alarmTime = new Date();
+	var alarmTime = new Date(Date.parse(appModel.AppSettingsCurrent[AlarmName + "Start"]));
+	var today = new Date();
+	Mojo.Log.warn("alarm time " + alarmTime.getHours() + " and " + today.getHours());
+	if (alarmTime.getHours() == today.getHours())
 	{
-		//If this is a touchpad, opening a notification scene can force it to awake
-		//	Then we need to close that scene after a delay
-		systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 140, false, false);
-		setTimeout("doClose()", 2000);
+		Mojo.Log.warn("This is the right time for this alarm!");
+		var stageController = Mojo.Controller.stageController;
+		if (stageController.getScenes().length > 0)	//Determine if we were already running or not
+			alreadyRunning = true;
+		else
+			alreadyRunning = false;
+
+		var stageController = Mojo.Controller.stageController;
+		var touchpad = Mojo.Environment.DeviceInfo.platformVersionMajor>=3;
+		if (touchpad)
+		{
+			//If this is a touchpad, opening a notification scene can force it to awake
+			//	Then we need to close that scene after a delay
+			systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 140, false, false);
+			setTimeout("doClose()", 2000);
+		}
+		this.applySettingsFromAlarm(AlarmName);
+		if (!appModel.AppSettingsCurrent.Debug)
+			this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
+		else
+			Mojo.Log.info("Not re-setting alarms, since we're in Debug mode");
+		
+		if (!alreadyRunning && !touchpad)
+			stageController.window.close();
 	}
-	this.applySettingsFromAlarm(AlarmName);
-	if (!appModel.AppSettingsCurrent.Debug)
-		this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
 	else
-		Mojo.Log.info("Not re-setting alarms, since we're in Debug mode");
-	
-	if (!alreadyRunning && !touchpad)
-		stageController.window.close();
+	{
+		Mojo.Log.error("This is the wrong time for this alarm!");
+	}
 }
 
 doClose = function()
@@ -66,7 +78,7 @@ doClose = function()
 //Do the actual night moves associated with this alarm
 StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 {
-	Mojo.Log.info(new Date() + " - Applying settings...");
+	Mojo.Log.warn("Night moves is applying settings for " + settingName + " at " + new Date());
 	//Tell user what's happening
 	var showSettingName;
 	if (settingName == "Morn") 
@@ -112,16 +124,10 @@ StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 StageAssistant.prototype.manageAllAlarms = function(appSettings, currentAlarmName)
 {
 	Mojo.Log.warn("Night Moves is re-establishing all alarms.");
-
-	this.manageAlarm("Morn", null, false);
-	if (appSettings["MornEnabled"])
-	    this.manageAlarm("Morn", appSettings["MornStart"], appSettings["MornEnabled"], currentAlarmName);
-	this.manageAlarm("Eve", null, false);
-	if (appSettings["EveEnabled"])
-	    this.manageAlarm("Eve", appSettings["EveStart"], appSettings["EveEnabled"], currentAlarmName);
-	this.manageAlarm("Nite", null, false);
-	if (appSettings["NiteEnabled"])
-	    this.manageAlarm("Nite", appSettings["NiteStart"], appSettings["NiteEnabled"], currentAlarmName);	
+	this.manageAlarm("Morn", appSettings["MornStart"], appSettings["MornEnabled"], currentAlarmName);
+	this.manageAlarm("Eve", appSettings["EveStart"], appSettings["EveEnabled"], currentAlarmName);
+	this.manageAlarm("Nite", appSettings["NiteStart"], appSettings["NiteEnabled"], currentAlarmName);
+	//this.manageAlarm(currentAlarmName, false, false, false);
 }
 
 //This gnarly function actually sets the alarms. Depending on how far out the next alarm time is, we might need an absolute or relative alarm.
@@ -129,7 +135,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 {
 	//Clear out the alarm every time
 	if (systemModel.ClearSystemAlarm(alarmName))
-		Mojo.Log.warn("Cleared alarm: " + alarmName);
+		Mojo.Log.info("Cleared alarm: " + alarmName);
 	else
 		Mojo.Log.error("Could not clear alarm: " + alarmName);
 
@@ -223,7 +229,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 			}
 		}
 	}
-	Mojo.Log.warn("Alarm set result, " + alarmSetResult);
+	Mojo.Log.info("Alarm set result, " + alarmSetResult);
 	return alarmSetResult;
 }
 
@@ -264,6 +270,9 @@ StageAssistant.prototype.handleCommand = function(event) {
 				});
 				break;
 			case 'do-resetSettings':
+				this.manageAlarm("Morn", false, false, false);
+				this.manageAlarm("Eve", false, false, false);
+				this.manageAlarm("Nite", false, false, false);
 				appModel.ResetSettings();
 				break;
 		}

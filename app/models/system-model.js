@@ -16,7 +16,7 @@ var SystemModel = function() {
 SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 {
 	var success = true;
-    Mojo.Log.info("Setting relative alarm time: " + alarmTime);
+    Mojo.Log.warn("Setting relative alarm time, " + alarmName + ": " + alarmTime);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
 		parameters: {
@@ -46,7 +46,7 @@ SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 {
 	var success = true;
-    Mojo.Log.info("Setting absolute alarm time: " + alarmTime);
+    Mojo.Log.warn("Setting absolute alarm time, " + alarmName + ": " + alarmTime);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
 		parameters: {
@@ -76,7 +76,7 @@ SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 SystemModel.prototype.ClearSystemAlarm = function(alarmName)
 {
 	var success = true;
-    Mojo.Log.info("Clearing alarm: " + alarmName);
+    Mojo.Log.warn("Clearing alarm: " + alarmName);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "clear",
 		parameters: {"key": Mojo.Controller.appInfo.id + "-" + alarmName},
