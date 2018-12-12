@@ -1,8 +1,12 @@
+/*
+As well as handling launches, most of the alarm application and management ended up here.
+While this could probably be factored out to a seperate model, this Stage is sort of the centre of intelligence in the app, so I just kept it here
+*/
+
 function StageAssistant() {
 	/* this is the creator function for your stage assistant object */
 }
 
-var alreadyRunning = false;
 StageAssistant.prototype.setup = function() 
 {
 	//Bind local members
@@ -22,29 +26,34 @@ StageAssistant.prototype.setup = function()
 	}
 }
 
+var alreadyRunning = false;
 StageAssistant.prototype.launchWithAlarm = function(AlarmName)
 {
 	var stageController = Mojo.Controller.stageController;
-	if (stageController.getScenes().length > 0)	//Determine if we were already running or not
+	//Determine if we were already running or not
+	if (stageController.getScenes().length > 0)
 		alreadyRunning = true;
-	else
-		alreadyRunning = false;
 
-	var stageController = Mojo.Controller.stageController;
+	//Find the best way to do alarm things, depending on device type
 	var touchpad = Mojo.Environment.DeviceInfo.platformVersionMajor>=3;
 	if (touchpad)
 	{
-		//If this is a touchpad, opening a notification scene can force it to awake
+		//If this is a Touchpad, opening a notification scene can force it to awake and apply settings
 		//	Then we need to close that scene after a delay
 		systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 140, false, false);
 		setTimeout("doClose()", 2000);
 	}
-	this.applySettingsFromAlarm(AlarmName);
-	if (!appModel.AppSettingsCurrent.Debug)
-		this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
 	else
-		Mojo.Log.info("Not re-setting alarms, since we're in Debug mode");
+	{
+		//For Pre phones, we can just directly apply the settings
+		this.applySettingsFromAlarm(AlarmName);
+	}
 	
+	//Reset alarms
+	this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
+	
+	//For phones, close the app if it wasn't active before.
+	//	On Touchpads we'll make this decision later
 	if (!alreadyRunning && !touchpad)
 		stageController.window.close();
 }
@@ -52,7 +61,7 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName)
 //Do the actual night moves associated with this alarm
 StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 {
-	Mojo.Log.warn("Night moves is applying settings for " + settingName + " at " + new Date());
+	Mojo.Log.warn("Night Moves is applying settings for " + settingName + " at " + new Date());
 
 	var showSettingName;
 	if (settingName == "Morn") 
@@ -70,11 +79,11 @@ StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 			systemModel.setWANEnabled(true);
 			systemModel.setWifiEnabled(true);
 		}
-	};
+	}
 	if (settingName == "Eve") 
 	{ 
 		showSettingName = "evening"; 
-	};
+	}
 	if (settingName == "Nite") 
 	{ 
 		showSettingName = "night"; 
@@ -90,7 +99,7 @@ StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 			systemModel.setWANEnabled(false);
 			systemModel.setWifiEnabled(false);
 		}
-	};
+	}
 	
 	//Apply the settings
 	systemModel.SetSystemBrightness(appModel.AppSettingsCurrent[settingName + "Bright"]);
@@ -121,7 +130,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 
 	//If the alarm is on, set it again
 	var alarmType = "absolute";
-	if (alarmEnabled == "true" || alarmEnabled == true)	//If the alarm is on
+	if (alarmEnabled == "true" || alarmEnabled == true)
 	{
 		//now is the current datetime plus/minutes a minute, since alarms aren't precise
 		var now = new Date();
@@ -196,15 +205,6 @@ StageAssistant.prototype.handleCommand = function(event) {
 
 	if(event.type == Mojo.Event.command) {
 		switch(event.command) {
-			case 'do-toggleDebug':
-				if (appModel.AppSettingsCurrent.Debug == true)
-					appModel.AppSettingsCurrent.Debug = false;
-				else
-					appModel.AppSettingsCurrent.Debug = true;
-				appController.showBanner("Debug mode: " + appModel.AppSettingsCurrent.Debug, {source: 'notification'});
-				stageController.popScene();
-				stageController.pushScene("main");
-				break;
 			case 'do-togglePrecision':
 				if (appModel.AppSettingsCurrent.PreciseTimers == true)
 					appModel.AppSettingsCurrent.PreciseTimers = false;
@@ -239,9 +239,9 @@ doClose = function()
 {
     var stageController = Mojo.Controller.appController.getStageController("");
     Mojo.Log.info("Closing notification window at " + new Date() + " running is " + alreadyRunning);
-
 	systemModel.AllowDisplaySleep();
 	Mojo.Controller.appController.closeStage("alarm");
+	
 	if (!alreadyRunning)
 	{
 		Mojo.Log.info("Closing main window at " + new Date() + " running is " + alreadyRunning);
@@ -269,4 +269,7 @@ constructUTCAlarm = function(useTime)
 	return utcString;
 }
 
-padZeroes = function (num) { return ((num>9)?"":"0")+num; }
+padZeroes = function(num) 
+{ 
+	return ((num>9)?"":"0")+num; 
+}

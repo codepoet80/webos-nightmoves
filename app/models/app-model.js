@@ -19,7 +19,6 @@ var AppModel = function()
 	//Define cookie defaults here and they will be loaded and enforced below
     this.AppSettingsDefaults = {
 		FirstRun: true,
-		Debug: false,
 		PreciseTimers: false,
 		NotificationOptionEnabled: 'false',
 		DataOptionEnabled: 'false',

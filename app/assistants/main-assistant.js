@@ -1,3 +1,6 @@
+/*
+In (fairly purely) MVC fashion, this assistant is primarily concerned with UI interactions on the main scene.
+*/
 function MainAssistant() {
 	
 }
@@ -50,14 +53,8 @@ MainAssistant.prototype.setup = function()
 	//App Menu (handled in stage controller: stage-assistant.js)
 	this.controller.setupWidget(Mojo.Menu.appMenu, stageController.appMenuAttributes, stageController.appMenuModel);
 
-	if (appModel.AppSettingsCurrent["Debug"])
-		document.getElementById("txtExplainDebugMode").style.display = "block";
-	else
-		document.getElementById("txtExplainDebugMode").style.display = "none";
-
 	//With each launch, maybe we should re-establish alarms, in order to "self-heal"
-	if(!appModel.AppSettingsCurrent.Debug && !appModel.AlarmLaunch)
-		stageController.manageAllAlarms(appModel.AppSettingsCurrent);
+	stageController.manageAllAlarms(appModel.AppSettingsCurrent);
 }
 
 MainAssistant.prototype.activate = function(event) {

@@ -1,3 +1,9 @@
+/*
+In the app assistant, we setup some app-wide global objects and handle different kinds of launches, creating and delegating to the main stage
+Note: In theory, it should be possible to handle alarm launches without any scenes or stages by declaring noWindow:true in the appinfo.json
+	However, this seems to break loading of the DOM and other shared objects, so it just wasn't worth it. As a result, during alarm
+	launches, the main stage will be loaded and used -- then discarded if it wasn't already in use.
+*/
 var appModel = null;
 var systemModel = null;
 function AppAssistant(appController) {
@@ -37,6 +43,7 @@ AppAssistant.prototype.handleLaunch = function(params) {
 		{
 			Mojo.Log.info("calling existing stage!");
 			var stageController = this.controller.getStageController("");
+			stageController.window.focus();
 			stageController.launchWithAlarm(appModel.AlarmLaunchName, true);
 		}
 		//If not, this will fall through to normal stage creation
