@@ -13,12 +13,12 @@ MainAssistant.prototype.setup = function()
 	stageController.appMenuAttributes = {omitDefaultItems: true};
 		stageController.appMenuModel = { label: "Settings",
 		items: [
-			{label: ('Advanced'),
-				items: [
-					{label: "Debug Timers", checkEnabled: true, command: 'do-toggleDebug', chosen:appModel.AppSettingsCurrent.Debug },
-					{label: "Precise Timers", checkEnabled: true, command: 'do-togglePrecision', chosen:appModel.AppSettingsCurrent.PreciseTimers }
-				]
-			},
+			//{label: ('Advanced'),
+			//	items: [
+			//		{label: "Debug Timers", checkEnabled: true, command: 'do-toggleDebug', chosen:appModel.AppSettingsCurrent.Debug },		
+			//	]
+			//},
+			{label: "Precise Timers", checkEnabled: true, command: 'do-togglePrecision', chosen:appModel.AppSettingsCurrent.PreciseTimers },
 			{label: "Reset Settings", command: 'do-resetSettings'}, 
 			{label: "About Night Moves", command: 'do-myAbout'}
 		]
@@ -238,18 +238,8 @@ MainAssistant.prototype.togglePressed = function(event)
 	appModel.SaveSettings();
 	Mojo.Log.info("**** Settings when toggle pressed: " + JSON.stringify(appModel.AppSettingsCurrent));
 
-	if (event.srcElement.id.indexOf("Option") != -1)	//This is an option toggle
-	{
-		Mojo.Controller.getAppController().showBanner(findSettingName + " is " + event.value, {source: 'notification'});
-	}
-	else	//This is a time toggle
-	{
-		var newTime = Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
-		if (newTime != false)
-		{
-			Mojo.Controller.getAppController().showBanner(newTime, {source: 'notification'});
-		}
-	}
+	if (event.srcElement.id.indexOf("Option") == -1)	//This is a time toggle
+		Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
 }
 
 MainAssistant.prototype.deactivate = function(event) {

@@ -16,7 +16,6 @@ var SystemModel = function() {
 SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 {
 	var success = true;
-    Mojo.Log.warn("Setting relative alarm time, " + alarmName + ": " + alarmTime);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
 		parameters: {
@@ -34,7 +33,7 @@ SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 			success = true;
 		},
 		onFailure: function(response) {
-			Mojo.Log.error("Alarm Set Failure",
+			Mojo.Log.error("Alarm Set Failure, " + alarmTime + ":",
 				JSON.stringify(response), response.errorText);
 			success = false;
 		}
@@ -46,7 +45,6 @@ SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 {
 	var success = true;
-    Mojo.Log.warn("Setting absolute alarm time, " + alarmName + ": " + alarmTime);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
 		parameters: {
@@ -64,7 +62,7 @@ SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 			success = true;
 		},
 		onFailure: function(response) {
-			Mojo.Log.error("Alarm Set Failure",
+			Mojo.Log.error("Alarm Set Failure, " + alarmTime + ":",
 				JSON.stringify(response), response.errorText);
 			success = false;
 		}
@@ -195,8 +193,8 @@ doVibrate = function()
 
 	//The below should work, but doesn't
 	/*this.vibeRequest = new Mojo.Service.Request("palm://com.palm.vibrate/vibrate", {
-		period: vibePeriod,
-		duration: vibeDuration,
+		period: 1,
+		duration: 1000,
 		onSuccess:function() { success = true; },
 		onFailure:function() { success = false; }
 	});*/
