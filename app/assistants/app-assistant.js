@@ -17,17 +17,17 @@ AppAssistant.prototype.handleLaunch = function(params) {
 	appModel.LoadSettings();
 	Mojo.Log.info("** App Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
 
+	//get the proxy for the stage in the event it already exists (eg: app is currently open)
+	var mainStage = this.controller.getStageProxy("");
 	Mojo.Log.info("Night Moves App is Launching");
 	if (!params || params["action"] == undefined)	//If no parameters were passed, this is a normal launch
 	{	
 		Mojo.Log.info("This is a normal launch");
 		appModel.AlarmLaunch = false;
-		//get the proxy for the stage in the event it already exists (eg: app is currently open)
-		var mainStage = this.controller.getStageProxy("");
 		if (mainStage)  //if the stage already exists then just bring it into focus
 		{
 			var stageController = this.controller.getStageController("");
-			stageController.window.focus();
+			stageController.activate();
 		} 
 		return;
 	}
@@ -37,13 +37,11 @@ AppAssistant.prototype.handleLaunch = function(params) {
 		appModel.AlarmLaunch = true;		
 		appModel.AlarmLaunchName = params["action"];
 
-		//get the proxy for the stage in the event it already exists (eg: app is currently open)
-		var mainStage = this.controller.getStageProxy("");
 		if (mainStage) //if the stage already exists then let it handle the re-launch
 		{
 			Mojo.Log.info("calling existing stage!");
 			var stageController = this.controller.getStageController("");
-			stageController.window.focus();
+			stageController.activate();
 			stageController.launchWithAlarm(appModel.AlarmLaunchName, true);
 		}
 		//If not, this will fall through to normal stage creation

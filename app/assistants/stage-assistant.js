@@ -199,7 +199,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 
 //Handle menu and button bar commands
 StageAssistant.prototype.handleCommand = function(event) {
-	this.controller=Mojo.Controller.stageController.activeScene();
+	var currentScene = Mojo.Controller.stageController.activeScene();
 	var stageController = Mojo.Controller.stageController;
 	var appController = Mojo.Controller.getAppController();
 
@@ -215,7 +215,7 @@ StageAssistant.prototype.handleCommand = function(event) {
 				stageController.pushScene("main");
 				break;
 			case 'do-myAbout':
-				this.controller.showAlertDialog({
+				currentScene.showAlertDialog({
 					onChoose: function(value) {},
 					title: $L("Night Moves"),
 					message: $L("Copyright 2018, Jonathan Wise. Available under an MIT License. Source code available at: https://github.com/codepoet80/webos-nightmoves"),

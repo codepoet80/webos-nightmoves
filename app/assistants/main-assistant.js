@@ -8,13 +8,12 @@ function MainAssistant() {
 /* Called before scene is visible, before any transitions take place,and before widgets are rendered. */
 MainAssistant.prototype.setup = function()
 {
-	appModel.LoadSettings();
 	Mojo.Log.info("** Stage Loaded Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
 	var stageController = Mojo.Controller.stageController;
 
 	//Setup App Menu
 	stageController.appMenuAttributes = {omitDefaultItems: true};
-		stageController.appMenuModel = { label: "Settings",
+	stageController.appMenuModel = { label: "Settings",
 		items: [
 			//{label: ('Advanced'),
 			//	items: [
