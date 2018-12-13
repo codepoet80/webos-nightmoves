@@ -32,7 +32,11 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName)
 	var stageController = Mojo.Controller.stageController;
 	//Determine if we were already running or not
 	if (stageController.getScenes().length > 0)
+	{
+		stageController.swapScene({transition: Mojo.Transition.none, name: "main"});
+		stageController.window.focus();
 		alreadyRunning = true;
+	}
 
 	//Find the best way to do alarm things, depending on device type
 	var touchpad = Mojo.Environment.DeviceInfo.platformVersionMajor>=3;
