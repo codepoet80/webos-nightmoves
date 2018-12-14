@@ -74,7 +74,7 @@ MainAssistant.prototype.activate = function(event) {
 		var welcomeMessage = "With this app, you can configure the settings you want your webOS device to be set to at different times in the day. Default settings have been loaded to get things started.";
 		if (Mojo.Environment.DeviceInfo.platformVersionMajor>=3)
 		{
-			welcomeMessage += "<br><br><b>TouchPad Usage Notes:</b> Because the TouchPad won't allow its settings to be changed from behind the lock screen, this app will only work if the lock screen is not active. This occurs when the TouchPad is charging (including a TouchStone) or if the lock screen has been disabled with a tweak."
+			welcomeMessage += "<br><br><b>TouchPad Usage Notes:</b> The lock screen can cause problems on the TouchPad. To work-around, you can either disable the lock screen with a tweak, or make sure this app is closed when not in use."
 		}
 		Mojo.Additions.ShowDialogBox("Welcome to Night Moves!", welcomeMessage);
 	}
