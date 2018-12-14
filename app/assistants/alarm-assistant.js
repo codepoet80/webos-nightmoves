@@ -9,7 +9,7 @@ function AlarmAssistant(argFromPusher){
 
 AlarmAssistant.prototype.setup = function(){
     Mojo.Log.info("notification stage setup at " + new Date());
-    
+    systemModel.SetDisplayState("unlock");
     //Find the main scene controller so we can call its functions
     var stageController = Mojo.Controller.stageController;
     if (stageController.getScenes("main").length > 0)
