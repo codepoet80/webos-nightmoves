@@ -5,7 +5,7 @@ System Model
  Author: Jonathan Wise
  License: MIT
  Description: A generic and re-usable model for accessing webOS system features more easily
-				Privileged functions can only be called if your App ID is named with com.palm.webos
+				Privileged functions can only be called if your App ID starts with com.palm.webos
 */
 
 var SystemModel = function() { 
@@ -98,33 +98,6 @@ SystemModel.prototype.PlaySound = function(soundName)
 	});
 }
 
-var displayState;
-SystemModel.prototype.GetDisplayState = function (callBack)
-{
-	Mojo.Log.info("Getting display state"); 
-	new Mojo.Service.Request("palm://com.palm.display/control", {
-		method: "status",
-		parameters: { },
-		onSuccess: callBack,
-		onFailure: callBack
-	});
-}
-
-SystemModel.prototype.SetDisplayState = function (state)
-{
-	Mojo.Log.error("Setting display state to " + state); 
- 	new Mojo.Service.Request("palm://com.palm.display/control", {
-		method: "setState",
-		parameters: { "state": state },
-		onSuccess: function(response) {
-			Mojo.Log.info("Display set success: ", JSON.stringify(response));
-		},
-		onFailure: function(response) {
-			Mojo.Log.error("Display set error: ", JSON.stringify(response), response.errorText);
-		}
-	});
-}
-
 //Allow the display to sleep
 SystemModel.prototype.AllowDisplaySleep = function (stageController)
 {
@@ -177,7 +150,7 @@ SystemModel.prototype.ShowNotificationStage = function(stageName, sceneName, hei
 	}, stageCallBack, 'popupalert');
 }
 
-//Vibrate the device -- TODO: replace work-around
+//Vibrate the device
 SystemModel.prototype.Vibrate = function(vibrate)
 {
 	var success = true;
@@ -274,6 +247,51 @@ SystemModel.prototype.SetSystemBrightness = function (newBrightness)
 			onFailure: function(response) { Mojo.Log.warn("Screen brightess not set!", JSON.stringify(response)); }
 		});
 		return request;
+	}
+	else
+	{
+		Mojo.Log.error("Privileged system services can only be called by apps with an ID that starts with 'com.palm.webos'!");
+		throw("Privileged system service call not allowed for this App ID!");
+	}
+}
+
+//Get the state of the display ("undefined", "dimmed", "off" or "on")
+//	Requires a callback
+SystemModel.prototype.GetDisplayState = function (callBack)
+{
+	if (Mojo.Controller.appInfo.id.indexOf("com.palm.webos") != -1)
+	{
+		Mojo.Log.info("Getting display state"); 
+		new Mojo.Service.Request("palm://com.palm.display/control", {
+			method: "status",
+			parameters: { },
+			onSuccess: callBack,
+			onFailure: callBack
+		});
+	}
+	else
+	{
+		Mojo.Log.error("Privileged system services can only be called by apps with an ID that starts with 'com.palm.webos'!");
+		throw("Privileged system service call not allowed for this App ID!");
+	}
+}
+
+//Set the state of the display ("unlocked", "dimmed", "off" or "on")
+SystemModel.prototype.SetDisplayState = function (state)
+{
+	if (Mojo.Controller.appInfo.id.indexOf("com.palm.webos") != -1)
+	{
+		Mojo.Log.error("Setting display state to " + state); 
+		new Mojo.Service.Request("palm://com.palm.display/control", {
+			method: "setState",
+			parameters: { "state": state },
+			onSuccess: function(response) {
+				Mojo.Log.info("Display set success: ", JSON.stringify(response));
+			},
+			onFailure: function(response) {
+				Mojo.Log.error("Display set error: ", JSON.stringify(response), response.errorText);
+			}
+		});
 	}
 	else
 	{
