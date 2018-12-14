@@ -1,6 +1,6 @@
 /*
 System Model
- Version 0.5
+ Version 0.6
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -15,7 +15,6 @@ var SystemModel = function() {
 //Create a named System Alarm using relative time ("in")
 SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 {
-	var success = true;
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
 		parameters: {
@@ -30,21 +29,18 @@ SystemModel.prototype.SetSystemAlarmRelative = function(alarmName, alarmTime)
 		},
 		onSuccess: function(response) {
 			Mojo.Log.info("Alarm Set Success", JSON.stringify(response));
-			success = true;
 		},
 		onFailure: function(response) {
 			Mojo.Log.error("Alarm Set Failure, " + alarmTime + ":",
 				JSON.stringify(response), response.errorText);
-			success = false;
 		}
 	});
-	return success;
+	return true;
 }
 
 //Create a named System Alarm using absolute time ("at")
 SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 {
-	var success = true;
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "set",
 		parameters: {
@@ -59,21 +55,18 @@ SystemModel.prototype.SetSystemAlarmAbsolute = function(alarmName, alarmTime)
 		},
 		onSuccess: function(response) {
 			Mojo.Log.info("Alarm Set Success", JSON.stringify(response));
-			success = true;
 		},
 		onFailure: function(response) {
 			Mojo.Log.error("Alarm Set Failure, " + alarmTime + ":",
 				JSON.stringify(response), response.errorText);
-			success = false;
 		}
 	});
-	return success;
+	return true;
 }
 
 //Remove a named System alarm
 SystemModel.prototype.ClearSystemAlarm = function(alarmName)
 {
-	var success = true;
     Mojo.Log.warn("Clearing alarm: " + alarmName);
     this.wakeupRequest = new Mojo.Service.Request("palm://com.palm.power/timeout", {
 		method: "clear",
@@ -88,13 +81,12 @@ SystemModel.prototype.ClearSystemAlarm = function(alarmName)
 			success = false;
 		}
 	});
-	return success;
+	return true;
 }
 
 //Play a pre-defined system sound
 SystemModel.prototype.PlaySound = function(soundName)
 {
-	var success = true;
 	Mojo.Log.info("Playing sound: " + soundName);
 	this.soundRequest = new Mojo.Service.Request("palm://com.palm.audio/systemsounds", {
 		method: "playFeedback",
@@ -104,16 +96,43 @@ SystemModel.prototype.PlaySound = function(soundName)
 		onSuccess:function() { success = true; },
 		onFailure:function() { success = false; }
 	});
-	return success;
+}
+
+var displayState;
+SystemModel.prototype.GetDisplayState = function (callBack)
+{
+	Mojo.Log.info("Getting display state"); 
+	new Mojo.Service.Request("palm://com.palm.display/control", {
+		method: "status",
+		parameters: { },
+		onSuccess: callBack,
+		onFailure: callBack
+	});
+}
+
+SystemModel.prototype.SetDisplayState = function (state)
+{
+	Mojo.Log.error("Setting display state to " + state); 
+ 	new Mojo.Service.Request("palm://com.palm.display/control", {
+		method: "setState",
+		parameters: { "state": state },
+		onSuccess: function(response) {
+			Mojo.Log.info("Display set success: ", JSON.stringify(response));
+		},
+		onFailure: function(response) {
+			Mojo.Log.error("Display set error: ", JSON.stringify(response), response.errorText);
+		}
+	});
 }
 
 //Allow the display to sleep
-SystemModel.prototype.AllowDisplaySleep = function ()
+SystemModel.prototype.AllowDisplaySleep = function (stageController)
 {
-	var stageController = Mojo.Controller.getAppController().getActiveStageController();
+	if (!stageController)
+		stageController = Mojo.Controller.getAppController().getActiveStageController();
 	
 	//Tell the System it doesn't have to stay awake any more
-	Mojo.Log.info("allowing display sleep");
+	Mojo.Log.info("Allowing display sleep");
 
 	stageController.setWindowProperties({
 		blockScreenTimeout: false
@@ -121,12 +140,13 @@ SystemModel.prototype.AllowDisplaySleep = function ()
 }
 
 //Prevent the display from sleeping
-SystemModel.prototype.PreventDisplaySleep = function ()
+SystemModel.prototype.PreventDisplaySleep = function (stageController)
 {
-	var stageController = Mojo.Controller.getAppController().getActiveStageController();
+	if (!stageController)
+		stageController = Mojo.Controller.getAppController().getActiveStageController();
 	
 	//Ask the System to stay awake while timer is running
-	Mojo.Log.info("preventing display sleep");
+	Mojo.Log.info("Preventing display sleep");
 
 	stageController.setWindowProperties({
 		blockScreenTimeout: true
@@ -184,20 +204,16 @@ var vibeMax = 5;
 doVibrate = function()
 {
 	vibeCount++;
-	Mojo.Controller.getAppController().playSoundNotification("vibrate");	//Work-around because vibrate function (see below) doesn't work
+	new Mojo.Service.Request("palm://com.palm.vibrate", {
+		method: "vibrate",
+		parameters: { "period": 500, "duration": 1000 }
+	});
+
 	if (vibeCount >= vibeMax)
 	{
 		clearInterval(vibeInterval);
 		vibeCount = 0;
 	}
-
-	//The below should work, but doesn't
-	/*this.vibeRequest = new Mojo.Service.Request("palm://com.palm.vibrate/vibrate", {
-		period: 1,
-		duration: 1000,
-		onSuccess:function() { success = true; },
-		onFailure:function() { success = false; }
-	});*/
 }
 
 //Privileged functions

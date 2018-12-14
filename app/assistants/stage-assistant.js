@@ -26,15 +26,18 @@ StageAssistant.prototype.setup = function()
 	}
 }
 
+var screenWasOn = false;
 var alreadyRunning = false;
-StageAssistant.prototype.launchWithAlarm = function(AlarmName)
+StageAssistant.prototype.launchWithAlarm = function(AlarmName, ScreenIsOn)
 {
 	var stageController = Mojo.Controller.stageController;
+	screenWasOn = ScreenIsOn;
 	//Determine if we were already running or not
 	if (stageController.getScenes().length > 0)
 	{
-		stageController.swapScene({transition: Mojo.Transition.none, name: "main"});
+		//swapping the scene in with animation helps the TouchPad wake up!
 		stageController.window.focus();
+		stageController.swapScene({ name: "main" });
 		alreadyRunning = true;
 	}
 
@@ -42,24 +45,49 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName)
 	var touchpad = Mojo.Environment.DeviceInfo.platformVersionMajor>=3;
 	if (touchpad)
 	{
-		//If this is a Touchpad, opening a notification scene can force it to awake and apply settings
-		//	Then we need to close that scene after a delay
+		//If this is a Touchpad, we have to do some extra heroics
+		if (!ScreenIsOn)	//If the screen was off, turn it on
+			systemModel.SetDisplayState("on");
+		//Use a new stage to force the app to get control, we'll apply settings from there
 		systemModel.ShowNotificationStage("alarm", "main/alarm-scene", 140, false, false);
-		setTimeout("doClose()", 2000);
+		//Reset alarms
+		this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
+		//Wait for everything to happen, then clean up
+		setTimeout("doTouchPadAlarmFinish()", 2500);
 	}
 	else
 	{
 		//For Pre phones, we can just directly apply the settings
 		this.applySettingsFromAlarm(AlarmName);
-	}
-	
-	//Reset alarms
-	this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
-	
-	//For phones, close the app if it wasn't active before.
-	//	On Touchpads we'll make this decision later
-	if (!alreadyRunning && !touchpad)
+		//Reset alarms
+		this.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
+		//Clean up
+		doPalmPreAlarmFinish();	
+	}	
+}
+
+//Called right away on the Pre to put the environment back the way it was before the alarm launch
+doPalmPreAlarmFinish = function()
+{
+	if (!screenWasOn)	//Turn the screen back off if was off when the alarm fired
+		systemModel.SetDisplayState("off");
+	if (!alreadyRunning)	//Quit the app if it wasn't running when the alarm fired
 		stageController.window.close();
+}
+
+//Fires after a delay on the TouchPad to put the environment back the way it was before the alarm launch
+doTouchPadAlarmFinish = function()
+{
+    var stageController = Mojo.Controller.appController.getStageController("");
+	Mojo.Log.warn("Closing notification window at " + new Date() + " running is " + alreadyRunning);
+	Mojo.Controller.appController.closeStage("alarm");
+	if (!screenWasOn)	//Turn the screen back off if was off when the alarm fired
+		systemModel.SetDisplayState("off");
+	if (!alreadyRunning)	//Quit the app if it wasn't running when the alarm fired
+	{
+		Mojo.Log.info("Closing main window at " + new Date() + " running is " + alreadyRunning);
+		stageController.window.close();
+	}
 }
 
 //Do the actual night moves associated with this alarm
@@ -239,20 +267,6 @@ StageAssistant.prototype.handleCommand = function(event) {
 }; 
 
 //Helper functions
-doClose = function()
-{
-    var stageController = Mojo.Controller.appController.getStageController("");
-    Mojo.Log.info("Closing notification window at " + new Date() + " running is " + alreadyRunning);
-	systemModel.AllowDisplaySleep();
-	Mojo.Controller.appController.closeStage("alarm");
-	
-	if (!alreadyRunning)
-	{
-		Mojo.Log.info("Closing main window at " + new Date() + " running is " + alreadyRunning);
-		stageController.window.close();
-	}
-}
-
 adjustAlarmTimeToToday = function (theoreticalAlarmTime)
 {
 	var today = new Date();

@@ -8,7 +8,6 @@ function AlarmAssistant(argFromPusher){
 }
 
 AlarmAssistant.prototype.setup = function(){
-    systemModel.PreventDisplaySleep();
     Mojo.Log.info("notification stage setup at " + new Date());
     
     //Find the main scene controller so we can call its functions
