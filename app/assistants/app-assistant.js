@@ -29,6 +29,7 @@ AppAssistant.prototype.getDisplayStateCallBack = function (response)
 	if (response != null && response.state != null && response.state == "on")
 		screenOn = true;
 	Mojo.Log.error("screen on: " + screenOn);
+	systemModel.SetDisplayState("unlock");
 
 	Mojo.Log.warn("Night Moves App is Launching");
 	//get the proxy for the stage in the event it already exists (eg: app is currently open)
@@ -46,7 +47,6 @@ AppAssistant.prototype.getDisplayStateCallBack = function (response)
 		else	//If parameters were passed, this is a launch from a system alarm
 		{
 			Mojo.Log.warn("This is a re-launch with parameters: " + JSON.stringify(launchParams));
-			systemModel.SetDisplayState("unlock");
 			appModel.AlarmLaunch = true;		
 			appModel.AlarmLaunchName = launchParams["action"];
 
