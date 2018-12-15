@@ -127,14 +127,18 @@ SystemModel.prototype.PreventDisplaySleep = function (stageController)
 }
 
 //Show a notification window in its own small stage
+//	Launches with sound: pass true for default, false for no sound, or pass the path to a specific sound file
 SystemModel.prototype.ShowNotificationStage = function(stageName, sceneName, heightToUse, sound, vibrate) 
 {
 	Mojo.Log.info("Showing notification stage.");
 	//Determine what sound to use
-	//TODO: accept a file name as input
-	var soundToUse = "assets/silent.mp3";
-	if (sound != false && sound != "" && sound != null)
-		soundToUse = "/media/internal/ringtones/Rain Dance.mp3"
+	var soundToUse;
+	if (!sound)
+		soundToUse = "assets/silent.mp3";
+	else if (sound == true || sound == "")
+		soundToUse = "/media/internal/ringtones/Dulcimer (short).mp3"
+	else
+		soundToUse = sound;
 	if (vibrate != null)
 		this.Vibrate(vibrate);
 
