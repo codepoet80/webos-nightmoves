@@ -49,6 +49,10 @@ MainAssistant.prototype.setup = function()
 	this.setupTimePicker("Eve", appModel.AppSettingsCurrent);
 	this.setupTimePicker("Nite", appModel.AppSettingsCurrent);
 
+	//Setup morning weekend delay checkbox
+	this.controller.setupWidget('checkMornDelayWeekend', { property: 'value', trueValue: true, falseValue: false }, { value: Boolean(appModel.AppSettingsCurrent["MornDelayWeekend"]), disabled: false } );
+	Mojo.Event.listen(this.controller.get('checkMornDelayWeekend'), Mojo.Event.propertyChange, this.checkBoxChange.bind(this));
+
 	//App Menu (handled in stage controller: stage-assistant.js)
 	this.controller.setupWidget(Mojo.Menu.appMenu, stageController.appMenuAttributes, stageController.appMenuModel);
 
@@ -228,7 +232,6 @@ MainAssistant.prototype.togglePressed = function(event)
 {
 	//Change the value in settings
 	var findSettingName = event.srcElement.id.replace("att-toggle-", "");
-	findSettingName = findSettingName;
 	Mojo.Log.info("toggle setting: " + findSettingName);
 	appModel.AppSettingsCurrent[findSettingName + "Enabled"] = event.value.toString();
 	appModel.SaveSettings();
@@ -236,6 +239,15 @@ MainAssistant.prototype.togglePressed = function(event)
 
 	if (event.srcElement.id.indexOf("Option") == -1)	//This is a time toggle
 		Mojo.Controller.stageController.manageAlarm(findSettingName, appModel.AppSettingsCurrent[findSettingName + "Start"], appModel.AppSettingsCurrent[findSettingName + "Enabled"]);
+}
+
+MainAssistant.prototype.checkBoxChange = function (event)
+{
+	Mojo.Log.info("The value of the checkbox is now: " + event.value);
+	var findSettingName = event.srcElement.id.replace("check", "");
+	appModel.AppSettingsCurrent[findSettingName] = event.value.toString();
+	appModel.SaveSettings();
+	Mojo.Log.info("**** Settings when checkbox pressed: " + JSON.stringify(appModel.AppSettingsCurrent));
 }
 
 MainAssistant.prototype.deactivate = function(event) {

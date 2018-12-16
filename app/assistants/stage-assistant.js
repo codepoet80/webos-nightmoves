@@ -69,6 +69,8 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName, ScreenIsOn)
 //Called right away on the Pre to put the environment back the way it was before the alarm launch
 doPalmPreAlarmFinish = function()
 {
+	Mojo.Log.warn("Doing Pre Alarm Finish, Screen Was On: " + screenWasOn + ", App Was Running: " + alreadyRunning);
+	var stageController = Mojo.Controller.appController.getStageController("");
 	if (!screenWasOn)	//Turn the screen back off if was off when the alarm fired
 		systemModel.SetDisplayState("off");
 	if (!alreadyRunning)	//Quit the app if it wasn't running when the alarm fired
@@ -203,8 +205,14 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 			//Move the date to tomorrow
 			var utcAlarm = new Date(alarmTime.getTime());
 			utcAlarm.setDate(utcAlarm.getDate() + 1);
+			var adjustedAlarmTime = new Date(alarmTime);
+			if (alarmName == "Morn" && appModel.AppSettingsCurrent["MornDelayWeekend"] == "true")
+			{
+				adjustedAlarmTime = checkAdjustAlarmTimeForWeekends(adjustedAlarmTime);
+				utcAlarm = checkAdjustAlarmTimeForWeekends(utcAlarm);
+			}
 			utcAlarm = constructUTCAlarm(utcAlarm);
-			Mojo.Log.warn("Setting Absolute " + alarmName + " Alarm for Tomorrow: " + alarmTime + " (UTC: " + utcAlarm + ")");
+			Mojo.Log.warn("Setting Absolute " + alarmName + " Alarm for Tomorrow: " + adjustedAlarmTime.getHours() + ":" + padZeroes(adjustedAlarmTime.getMinutes()) + " (UTC: " + utcAlarm + ")");
 			alarmSetResult = systemModel.SetSystemAlarmAbsolute(alarmName, utcAlarm);
 			if (alarmSetResult && !bulk)
 				Mojo.Controller.getAppController().showBanner("Next trigger: tomorrow.", {source: 'notification'});
@@ -213,7 +221,7 @@ StageAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnab
 		if (alarmTime.getTime() >= nowMax.getTime())
 		{
 			var utcAlarm = constructUTCAlarm(alarmTime);
-			Mojo.Log.warn("Setting Absolute " + alarmName + " Alarm for Today: " + alarmTime + " (UTC: " + utcAlarm + ")");
+			Mojo.Log.warn("Setting Absolute " + alarmName + " Alarm for Today: " + alarmTime.getHours() + ":" + padZeroes(alarmTime.getMinutes()) + " (UTC: " + utcAlarm + ")");
 			alarmSetResult = systemModel.SetSystemAlarmAbsolute(alarmName, utcAlarm);
 			if (alarmSetResult && !bulk)
 				Mojo.Controller.getAppController().showBanner("Next trigger: later today.", {source: 'notification'});
@@ -275,6 +283,18 @@ adjustAlarmTimeToToday = function (theoreticalAlarmTime)
 	alarmAdjusted.setMonth(today.getMonth());
 	alarmAdjusted.setDate(today.getDate());
 	return alarmAdjusted;
+}
+
+checkAdjustAlarmTimeForWeekends = function (currentAlarmTime)
+{
+	if (currentAlarmTime.getDay() == 0 || currentAlarmTime.getDay() == 6)
+	{
+		Mojo.Log.info("Next alarm time is a weekend day, adding an hour!");
+		currentAlarmTime = new Date(currentAlarmTime.setHours(currentAlarmTime.getHours() + 1));
+	}
+	else
+		Mojo.Log.info("Next alarm time is not weekend day!");
+	return currentAlarmTime;
 }
 
 constructUTCAlarm = function(useTime)
