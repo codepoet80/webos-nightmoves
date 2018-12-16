@@ -251,8 +251,7 @@ StageAssistant.prototype.handleCommand = function(event) {
 				else
 					appModel.AppSettingsCurrent.PreciseTimers = true;
 				appController.showBanner("Using precision timers: " + appModel.AppSettingsCurrent.PreciseTimers, {source: 'notification'});
-				stageController.popScene();
-				stageController.pushScene("main");
+				stageController.swapScene({transition: Mojo.Transition.none, name: "main"});
 				break;
 			case 'do-myAbout':
 				currentScene.showAlertDialog({
