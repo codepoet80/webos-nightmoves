@@ -21,24 +21,23 @@ StageAssistant.prototype.setup = function()
 	this.controller.pushScene('main');
 	if (appModel.AlarmLaunch)	//If its an alarm re-launch, call the alarm launch handler
 	{
-		Mojo.Log.warn("Alarm stage launch at " + new Date() + ". Using alarm launch: " + appModel.AlarmLaunchName);
+		Mojo.Log.info("Stage launch with alarm at " + new Date() + ". Using alarm: " + appModel.AlarmLaunchName);
 		this.launchWithAlarm(appModel.AlarmLaunchName);
 	}
 }
 
 var screenWasOn = false;
-var alreadyRunning = false;
 StageAssistant.prototype.launchWithAlarm = function(AlarmName, ScreenIsOn)
 {
 	var stageController = Mojo.Controller.stageController;
 	screenWasOn = ScreenIsOn;
+	Mojo.Log.warn("Launching with alarm, screen was on: " + screenWasOn + ", app was running: " + AppRunning);
 	//Determine if we were already running or not
 	if (stageController.getScenes().length > 0)
 	{
 		//swapping the scene in with animation helps the TouchPad wake up!
 		stageController.window.focus();
 		stageController.swapScene({ name: "main" });
-		alreadyRunning = true;
 	}
 
 	//Find the best way to do alarm things, depending on device type
@@ -69,33 +68,30 @@ StageAssistant.prototype.launchWithAlarm = function(AlarmName, ScreenIsOn)
 //Called right away on the Pre to put the environment back the way it was before the alarm launch
 doPalmPreAlarmFinish = function()
 {
-	Mojo.Log.warn("Doing Pre Alarm Finish, Screen Was On: " + screenWasOn + ", App Was Running: " + alreadyRunning);
+	Mojo.Log.info("Doing Pre Alarm Finish, Screen Was On: " + screenWasOn + ", App Was Running: " + AppRunning);
 	var stageController = Mojo.Controller.appController.getStageController("");
 	if (!screenWasOn)	//Turn the screen back off if was off when the alarm fired
 		systemModel.SetDisplayState("off");
-	if (!alreadyRunning)	//Quit the app if it wasn't running when the alarm fired
+	if (!AppRunning)	//Quit the app if it wasn't running when the alarm fired
 		stageController.window.close();
 }
 
 //Fires after a delay on the TouchPad to put the environment back the way it was before the alarm launch
 doTouchPadAlarmFinish = function()
 {
-    var stageController = Mojo.Controller.appController.getStageController("");
-	Mojo.Log.warn("Closing notification window at " + new Date() + " running is " + alreadyRunning);
+	var stageController = Mojo.Controller.appController.getStageController("");
+	Mojo.Log.info("Doing TouchPad Alarm Finish at " + new Date() + ", Screen Was On: " + screenWasOn + ", App Was Running: " + AppRunning);
 	Mojo.Controller.appController.closeStage("alarm");
 	if (!screenWasOn)	//Turn the screen back off if was off when the alarm fired
 		systemModel.SetDisplayState("off");
-	if (!alreadyRunning)	//Quit the app if it wasn't running when the alarm fired
-	{
-		Mojo.Log.info("Closing main window at " + new Date() + " running is " + alreadyRunning);
+	if (!AppRunning)	//Quit the app if it wasn't running when the alarm fired
 		stageController.window.close();
-	}
 }
 
 //Do the actual night moves associated with this alarm
 StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 {
-	Mojo.Log.warn("Night Moves is applying settings for " + settingName + " at " + new Date());
+	Mojo.Log.warn("Applying settings for " + settingName + " at " + new Date());
 
 	var showSettingName;
 	if (settingName == "Morn") 
@@ -103,13 +99,13 @@ StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 		showSettingName = "morning"; 
 		if (appModel.AppSettingsCurrent["NotificationOptionEnabled"] == "true")
 		{
-			Mojo.Log.warn("Notifications are being enabled.");
+			Mojo.Log.info("Notifications are being enabled.");
 			systemModel.setShowNotificationsWhenLocked(true);
 			systemModel.setLEDLightNotifications(true);
 		}
 		if (appModel.AppSettingsCurrent["DataOptionEnabled"] == "true")
 		{
-			Mojo.Log.warn("Data connections are being enabled.");
+			Mojo.Log.info("Data connections are being enabled.");
 			systemModel.setWANEnabled(true);
 			systemModel.setWifiEnabled(true);
 		}
@@ -123,13 +119,13 @@ StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 		showSettingName = "night"; 
 		if (appModel.AppSettingsCurrent["NotificationOptionEnabled"] == "true")
 		{
-			Mojo.Log.warn("Notifications are being disabled.");
+			Mojo.Log.info("Notifications are being disabled.");
 			systemModel.setShowNotificationsWhenLocked(false);
 			systemModel.setLEDLightNotifications(false);
 		}
 		if (appModel.AppSettingsCurrent["DataOptionEnabled"] == "true")
 		{
-			Mojo.Log.warn("Data connections are being enabled.");
+			Mojo.Log.info("Data connections are being enabled.");
 			systemModel.setWANEnabled(false);
 			systemModel.setWifiEnabled(false);
 		}
@@ -146,7 +142,7 @@ StageAssistant.prototype.applySettingsFromAlarm = function(settingName)
 
 StageAssistant.prototype.manageAllAlarms = function(appSettings, currentAlarmName)
 {
-	Mojo.Log.warn("Night Moves is re-establishing all alarms.");
+	Mojo.Log.warn("Re-establishing all alarms.");
 	this.manageAlarm("Morn", appSettings["MornStart"], appSettings["MornEnabled"], currentAlarmName, true);
 	this.manageAlarm("Eve", appSettings["EveStart"], appSettings["EveEnabled"], currentAlarmName, true);
 	this.manageAlarm("Nite", appSettings["NiteStart"], appSettings["NiteEnabled"], currentAlarmName, true);

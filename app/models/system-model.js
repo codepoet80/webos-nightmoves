@@ -285,7 +285,7 @@ SystemModel.prototype.SetDisplayState = function (state)
 {
 	if (Mojo.Controller.appInfo.id.indexOf("com.palm.webos") != -1)
 	{
-		Mojo.Log.error("Setting display state to " + state); 
+		Mojo.Log.info("Setting display state to " + state); 
 		new Mojo.Service.Request("palm://com.palm.display/control", {
 			method: "setState",
 			parameters: { "state": state },

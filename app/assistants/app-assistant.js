@@ -7,6 +7,7 @@ Note: In theory, it should be possible to handle alarm launches without any scen
 var appModel = null;
 var systemModel = null;
 var launchParams = null;
+var AppRunning = false;
 function AppAssistant(appController) {
 	appModel = new AppModel();
 	systemModel = new SystemModel();
@@ -16,8 +17,17 @@ function AppAssistant(appController) {
 //This function will handle relaunching the app when an alarm goes off(see the device/alarm scene)
 AppAssistant.prototype.handleLaunch = function(params) {
 	launchParams = params;
+	Mojo.Log.info("Night Moves is Launching");
 	appModel.LoadSettings();
 	Mojo.Log.info("** App Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
+	var mainStage = this.controller.getStageProxy("");
+	if (mainStage) 	//If the stage exists, note that we were already running
+	{
+		Mojo.Log.info("Found existing stage, app was already running");
+		AppRunning = true;
+	}
+	else
+		Mojo.Log.info("Found no existing stage, app was not running");
 	//We'll finish setting up after we learn if the screen is on or off
 	systemModel.GetDisplayState(this.getDisplayStateCallBack);
 };
@@ -28,10 +38,8 @@ AppAssistant.prototype.getDisplayStateCallBack = function (response)
 	screenOn = false;
 	if (response != null && response.state != null && response.state == "on")
 		screenOn = true;
-	Mojo.Log.error("screen on: " + screenOn);
 	systemModel.SetDisplayState("unlock");
 
-	Mojo.Log.warn("Night Moves App is Launching");
 	//get the proxy for the stage in the event it already exists (eg: app is currently open)
 	var mainStage = this.controller.getStageProxy("");
 	if (mainStage) 	//If the stage exists, use it
@@ -39,18 +47,18 @@ AppAssistant.prototype.getDisplayStateCallBack = function (response)
 		var stageController = this.controller.getStageController("");
 		if (!launchParams || launchParams["action"] == undefined)	//If no parameters were passed, this is a normal launch
 		{	
-			Mojo.Log.warn("This is a normal launch");
+			Mojo.Log.info("This is a normal launch");
 			appModel.AlarmLaunch = false;
 			stageController.activate(); //bring existing stage into focus
 			return;
 		}
 		else	//If parameters were passed, this is a launch from a system alarm
 		{
-			Mojo.Log.warn("This is a re-launch with parameters: " + JSON.stringify(launchParams));
+			Mojo.Log.info("This is a re-launch with parameters: " + JSON.stringify(launchParams));
 			appModel.AlarmLaunch = true;		
 			appModel.AlarmLaunchName = launchParams["action"];
 
-			Mojo.Log.info("calling existing stage!");
+			Mojo.Log.info("Calling existing stage!");
 			var stageController = this.controller.getStageController("");
 			stageController.launchWithAlarm(appModel.AlarmLaunchName, screenOn);
 			

@@ -14,3 +14,4 @@ It currently works perfectly on the Pre3, probably works on Pre2, and works grea
 - 1.0.0 - Timers are now absolute UTC time in most cases. Improved Touchpad re-launch scenario handling.
 - 1.0.1 - All launch scenarios supported on Pre and TouchPad (lockscreen also works in most scenarios.)
 - 1.0.2 - Fix a bug where Pre couldn't clean-up app. Add option for weekend delay on morning timer.
+- 1.0.3 - Fix another launch bug on Pre where the app wouldn't re-close after alarm launch.
