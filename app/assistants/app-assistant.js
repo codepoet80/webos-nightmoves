@@ -8,6 +8,7 @@ var launchParams = null;
 var alarmUtils = new Object();
 var AppRunning = false;
 var ScreenWasOn = false;
+var IsTouchPad = false;
 var MainStageName = "main";
 function AppAssistant(appController) {
 	appModel = new AppModel();
@@ -21,13 +22,13 @@ function AppAssistant(appController) {
 	alarmUtils.applySettingsFromAlarm = this.applySettingsFromAlarm;
 }
 
-//This function will handle relaunching the app when an alarm goes off(see the device/alarm scene)
-//LAUNCH STEP 1
+//LAUNCH STEP 1 - Determine launch type and state
 AppAssistant.prototype.handleLaunch = function(params) {
 	launchParams = params;
 	Mojo.Log.info("Night Moves is Launching! Params were: " + JSON.stringify(params));
 	appModel.LoadSettings();
 	Mojo.Log.info("** App Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
+	IsTouchPad = Mojo.Environment.DeviceInfo.platformVersionMajor>=3;
 
 	//Determine if we were already running
 	var mainStage = this.controller.getStageProxy(MainStageName);
@@ -42,14 +43,15 @@ AppAssistant.prototype.handleLaunch = function(params) {
 	systemModel.GetDisplayState(this.getDisplayStateCallBack.bind(this));
 };
 
-//LAUNCH STEP 2
+//LAUNCH STEP 2 - After determining state, decide what to launch
 AppAssistant.prototype.getDisplayStateCallBack = function (response)
 {
 	Mojo.Log.info("Called back from GetDisplayState with response: " + JSON.stringify(response) + " launchParams were: " + JSON.stringify(launchParams));
 	this.controller = Mojo.Controller.getAppController();
+	ScreenWasOn = false;
 	if (response != null && response.state != null && response.state == "on")
 		ScreenWasOn = true;
-
+		
 	if (AppRunning) 	//If the stage exists, use it
 	{
 		var stageController = this.controller.getStageController(MainStageName);
@@ -66,8 +68,11 @@ AppAssistant.prototype.getDisplayStateCallBack = function (response)
 			appModel.AlarmLaunch = true;		
 			appModel.AlarmLaunchName = launchParams["action"];
 
-			Mojo.Log.info("Calling existing stage!");
-			this.launchSceneWithAlarm(appModel.AlarmLaunchName);
+			Mojo.Log.info("Calling Alarm Apply on existing app!");
+			if (IsTouchPad && !ScreenWasOn)
+				this.launchSceneWithAlarm(appModel.AlarmLaunchName);
+			else
+				this.doAlarmApply(appModel.AlarmLaunchName);
 			return;
 		}
 	}
@@ -98,7 +103,7 @@ AppAssistant.prototype.getDisplayStateCallBack = function (response)
 	}
 }
 
-//LAUNCH STEP 3
+//LAUNCH STEP 3 - OPTION 1: Apply alarm with an active scene
 AppAssistant.prototype.launchSceneWithAlarm = function(AlarmName)
 {
 	var stageController = this.controller.getStageController(MainStageName);
@@ -113,11 +118,12 @@ AppAssistant.prototype.launchSceneWithAlarm = function(AlarmName)
 	this.doAlarmApply(AlarmName);
 }
 
+//LAUNCH STEP 3 - OPTION 2: Apply alarm without an active scene
 AppAssistant.prototype.doAlarmApply = function(AlarmName)
 {
+	Mojo.Log.warn("Silently applying alarm, screen was on: " + ScreenWasOn + ", app was running: " + AppRunning);
 	//Find the best way to do alarm things, depending on device type
-	var touchpad = Mojo.Environment.DeviceInfo.platformVersionMajor>=3;
-	if (touchpad)
+	if (IsTouchPad)
 	{
 		//If this is a Touchpad, we have to do some extra heroics
 		systemModel.SetDisplayState("unlock");	//Unlock the screen
@@ -128,7 +134,7 @@ AppAssistant.prototype.doAlarmApply = function(AlarmName)
 		//Reset alarms
 		alarmUtils.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
 		//Wait for everything to happen, then clean up
-		setTimeout(this.doTouchPadAlarmFinish.bind(this), 2500);
+		setTimeout("doTouchPadAlarmFinish()", 2500);
 	}
 	else
 	{
@@ -137,7 +143,7 @@ AppAssistant.prototype.doAlarmApply = function(AlarmName)
 		//Reset alarms
 		alarmUtils.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
 		//Clean up
-		this.doPalmPreAlarmFinish().bind(this);	
+		this.doPalmPreAlarmFinish();	
 	}	
 }
 
@@ -153,7 +159,7 @@ AppAssistant.prototype.doPalmPreAlarmFinish = function()
 }
 
 //Fires after a delay on the TouchPad to put the environment back the way it was before the alarm launch
-AppAssistant.prototype.doTouchPadAlarmFinish = function()
+doTouchPadAlarmFinish = function()
 {
 	Mojo.Log.info("Doing TouchPad Alarm Finish at " + new Date() + ", Screen Was On: " + ScreenWasOn + ", App Was Running: " + AppRunning);
 	var stageController = Mojo.Controller.appController.getStageController(MainStageName);
