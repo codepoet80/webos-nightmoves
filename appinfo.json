@@ -1,10 +1,11 @@
 {
 	"id": "com.palm.webos.nightmoves",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"vendor": "Jonathan Wise",
 	"type": "web",
 	"main": "index.html",
 	"title": "Night Moves",
+	"noWindow": true,
 	"uiRevision": "2",
 	"icon": "icon.png",
 	"splashicon": "icon-256x256.png",

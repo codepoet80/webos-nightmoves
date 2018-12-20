@@ -9,17 +9,8 @@ function AlarmAssistant(argFromPusher){
 
 AlarmAssistant.prototype.setup = function(){
     Mojo.Log.info("notification stage setup at " + new Date());
-    systemModel.SetDisplayState("unlock");
-    //Find the main scene controller so we can call its functions
-    var stageController = Mojo.Controller.stageController;
-    if (stageController.getScenes("main").length > 0)
-    {
-        if (stageController.getScenes("main")[0].stageController != null)
-        {
-            var parentScene = stageController.getScenes("main")[0].stageController;
-            parentScene.applySettingsFromAlarm(appModel.AlarmLaunchName);
-        }
-    }
+    //systemModel.SetDisplayState("unlock");
+    alarmUtils.applySettingsFromAlarm(appModel.AlarmLaunchName);
 }
 
 // Cleanup anything we did in setup function

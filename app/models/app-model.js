@@ -1,6 +1,6 @@
 /*
 App Model
- Version 0.3a
+ Version 0.3b
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -108,12 +108,13 @@ AppModel.prototype.SaveSettings = function ()
 
 AppModel.prototype.ResetSettings = function()
 {
+	Mojo.Log.info("resetting settings");
 	//Tell main scene to drop settings
 	this.AppSettingsCurrent = this.AppSettingsDefaults;
 	this.SaveSettings();
-	Mojo.Log.info("reset settings");
+	Mojo.Log.info("settings have been reset");
 	
-	var stageController = Mojo.Controller.stageController;
+	var stageController = Mojo.Controller.getAppController().getActiveStageController();
 	stageController.popScene(this.DefaultScene);
 	Mojo.Log.info("closed default scene");
 
