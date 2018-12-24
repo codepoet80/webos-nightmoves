@@ -1,6 +1,6 @@
 /*
 System Model
- Version 0.6
+ Version 0.7
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -385,3 +385,30 @@ SystemModel.prototype.setWifiEnabled = function(value) {
 		throw("Privileged system service call not allowed for this App ID!");
 	}
 }
+
+//Set the Bluetooth radio state
+SystemModel.prototype.setBluetoothEnabled = function(value) {
+	//var state  = value ? 'enabled':'disabled';
+	if (Mojo.Controller.appInfo.id.indexOf("com.palm.webos") != -1)
+	{
+		Mojo.Log.info("Setting Bluetooth State to " + value);
+		if (value == true)
+			this.bluetoothControlService("palm://com.palm.btmonitor/monitor/radioon", {visible: true, connectable: true}, null);   
+		else
+			this.bluetoothControlService("palm://com.palm.btmonitor/monitor/radiooff", null, null);
+    }
+	else
+	{
+		Mojo.Log.error("Privileged system services can only be called by apps with an ID that starts with 'com.palm.webos'!");
+		throw("Privileged system service call not allowed for this App ID!");
+	}
+}
+
+SystemModel.prototype.bluetoothControlService = function(url, params, cb)
+{
+	return new Mojo.Service.Request(url, {
+		onSuccess: cb,
+		onFailure: cb,
+		parameters: params,
+		}); 
+};

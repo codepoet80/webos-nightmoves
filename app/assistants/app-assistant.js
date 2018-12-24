@@ -191,6 +191,11 @@ AppAssistant.prototype.applySettingsFromAlarm = function(settingName)
 			systemModel.setWANEnabled(true);
 			systemModel.setWifiEnabled(true);
 		}
+		if (appModel.AppSettingsCurrent["BluetoothOptionEnabled"] == "true")
+		{
+			Mojo.Log.info("Bluetooth radio is being enabled.");
+			systemModel.setBluetoothEnabled(true);
+		}
 	}
 	if (settingName == "Eve") 
 	{ 
@@ -207,9 +212,14 @@ AppAssistant.prototype.applySettingsFromAlarm = function(settingName)
 		}
 		if (appModel.AppSettingsCurrent["DataOptionEnabled"] == "true")
 		{
-			Mojo.Log.info("Data connections are being enabled.");
+			Mojo.Log.info("Data connections are being disabled.");
 			systemModel.setWANEnabled(false);
 			systemModel.setWifiEnabled(false);
+		}
+		if (appModel.AppSettingsCurrent["BluetoothOptionEnabled"] == "true")
+		{
+			Mojo.Log.info("Bluetooth radio is being disabled.");
+			systemModel.setBluetoothEnabled(false);
 		}
 	}
 	
