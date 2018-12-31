@@ -163,6 +163,7 @@ doTouchPadAlarmFinish = function()
 {
 	Mojo.Log.info("Doing TouchPad Alarm Finish at " + new Date() + ", Screen Was On: " + ScreenWasOn + ", App Was Running: " + AppRunning);
 	var stageController = Mojo.Controller.appController.getStageController(MainStageName);
+	systemModel.AllowDisplaySleep();
 	Mojo.Controller.appController.closeStage("alarm");
 	if (!ScreenWasOn)	//Turn the screen back off if was off when the alarm fired
 		systemModel.SetDisplayState("off");
