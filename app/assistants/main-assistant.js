@@ -32,6 +32,7 @@ MainAssistant.prototype.setup = function()
 	this.setupTimeToggle('Nite', appModel.AppSettingsCurrent["NiteEnabled"], appModel.AppSettingsCurrent["NiteStart"]);
 	this.setupToggle('NotificationOption', appModel.AppSettingsCurrent["NotificationOptionEnabled"]);
 	this.setupToggle('DataOption', appModel.AppSettingsCurrent["DataOptionEnabled"]);
+	this.setupToggle('BluetoothOption', appModel.AppSettingsCurrent["BluetoothOptionEnabled"]);
 
 	//Setup sliders
 	this.sliderChanged = this.sliderChanged.bind(this);
@@ -254,10 +255,15 @@ MainAssistant.prototype.handleCommand = function(event) {
 		switch(event.command) {
 			case 'do-togglePrecision':
 				if (appModel.AppSettingsCurrent.PreciseTimers == true)
-					appModel.AppSettingsCurrent.PreciseTimers = false;
+				{
+					appModel.AppSettingsCurrent.PreciseTimers = false;				
+					appController.showBanner("Not using precise timers.", {source: 'notification'});
+				}
 				else
+				{
 					appModel.AppSettingsCurrent.PreciseTimers = true;
-				appController.showBanner("Using precision timers: " + appModel.AppSettingsCurrent.PreciseTimers, {source: 'notification'});
+					appController.showBanner("Using precise timers.", {source: 'notification'});
+				}
 				stageController.swapScene({transition: Mojo.Transition.none, name: "main"});
 				break;
 			case 'do-myAbout':

@@ -22,6 +22,7 @@ var AppModel = function()
 		PreciseTimers: false,
 		NotificationOptionEnabled: 'false',
 		DataOptionEnabled: 'false',
+		BluetoothOptionEnabled: 'false',
 		MornEnabled: 'false',
 		MornDelayWeekend: 'false',
         MornStart: this.BaseDateString + "06:00:00",
