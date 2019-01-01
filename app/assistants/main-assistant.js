@@ -241,7 +241,7 @@ MainAssistant.prototype.checkBoxChange = function (event)
 {
 	Mojo.Log.info("The value of the checkbox is now: " + event.value);
 	var findSettingName = event.srcElement.id.replace("check", "");
-	appModel.AppSettingsCurrent[findSettingName] = event.value.toString();
+	appModel.AppSettingsCurrent[findSettingName] = Boolean(event.value);
 	appModel.SaveSettings();
 	Mojo.Log.info("**** Settings when checkbox pressed: " + JSON.stringify(appModel.AppSettingsCurrent));
 }
