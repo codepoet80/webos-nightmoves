@@ -23,7 +23,7 @@ function AppAssistant(appController) {
 	alarmUtils.applySettingsFromAlarm = this.applySettingsFromAlarm;
 }
 
-//LAUNCH STEP 1 - Determine launch type and state
+//LAUNCH STEP 1A - Initial launch and state
 AppAssistant.prototype.handleLaunch = function(params) {
 	launchParams = params;
 	Mojo.Log.info("Night Moves is Launching! Params were: " + JSON.stringify(params));
@@ -33,18 +33,18 @@ AppAssistant.prototype.handleLaunch = function(params) {
 	systemModel.GetRunningApps(this.checkRunningApps.bind(this));
 };
 
-//LAUNCH STEP 1B - Determine what apps are running
+//LAUNCH STEP 1B - Determine what's running
 AppAssistant.prototype.checkRunningApps = function(response)
 {
-	var appList = JSON.stringify(response);
-	Mojo.Log.info("Running apps are: " + appList);
 	//Problem apps are ones that force the display to stay on.
 	var problemApps = ["com.palm.app.kindle", "org.scummvm.scummvm"]
+	var appList = JSON.stringify(response);
+	Mojo.Log.info("Other running apps are: " + appList);
 	for (var l=0;l<response.running.length;l++)
 	{
 		if(JSON.stringify(problemApps).indexOf(response.running[l].id) != -1)
 		{
-			Mojo.Log.info("found a problem app: " + response.running[l].id)
+			Mojo.Log.warn("found a problem app: " + response.running[l].id)
 			ProblemAppsRunning[ProblemAppsRunning.length] = response.running[l].processid;
 		}
 	}
@@ -167,6 +167,7 @@ AppAssistant.prototype.doAlarmApply = function(AlarmName)
 	}	
 }
 
+//Apply the selected strategy to deal with problem apps
 AppAssistant.prototype.handleProblemApps = function()
 {
 	if (ProblemAppsRunning.length > 0)
@@ -198,7 +199,8 @@ AppAssistant.prototype.handleProblemApps = function()
 			}
 		}
 	}
-	Mojo.Log.info("There were no problem apps to handle");
+	else
+		Mojo.Log.info("There were no problem apps to handle.");
 }
 
 //Called right away on the Pre to put the environment back the way it was before the alarm launch
