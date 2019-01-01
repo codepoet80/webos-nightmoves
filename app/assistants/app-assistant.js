@@ -236,19 +236,19 @@ AppAssistant.prototype.applySettingsFromAlarm = function(settingName)
 	if (settingName == "Morn") 
 	{ 
 		showSettingName = "morning"; 
-		if (appModel.AppSettingsCurrent["NotificationOptionEnabled"] == "true")
+		if (appModel.AppSettingsCurrent["NotificationOptionEnabled"])
 		{
 			Mojo.Log.info("Notifications are being enabled.");
 			systemModel.setShowNotificationsWhenLocked(true);
 			systemModel.setLEDLightNotifications(true);
 		}
-		if (appModel.AppSettingsCurrent["DataOptionEnabled"] == "true")
+		if (appModel.AppSettingsCurrent["DataOptionEnabled"])
 		{
 			Mojo.Log.info("Data connections are being enabled.");
 			systemModel.setWANEnabled(true);
 			systemModel.setWifiEnabled(true);
 		}
-		if (appModel.AppSettingsCurrent["BluetoothOptionEnabled"] == "true")
+		if (appModel.AppSettingsCurrent["BluetoothOptionEnabled"])
 		{
 			Mojo.Log.info("Bluetooth radio is being enabled.");
 			systemModel.setBluetoothEnabled(true);
