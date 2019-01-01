@@ -261,19 +261,19 @@ AppAssistant.prototype.applySettingsFromAlarm = function(settingName)
 	if (settingName == "Nite") 
 	{ 
 		showSettingName = "night"; 
-		if (appModel.AppSettingsCurrent["NotificationOptionEnabled"] == "true")
+		if (appModel.AppSettingsCurrent["NotificationOptionEnabled"])
 		{
 			Mojo.Log.info("Notifications are being disabled.");
 			systemModel.setShowNotificationsWhenLocked(false);
 			systemModel.setLEDLightNotifications(false);
 		}
-		if (appModel.AppSettingsCurrent["DataOptionEnabled"] == "true")
+		if (appModel.AppSettingsCurrent["DataOptionEnabled"])
 		{
 			Mojo.Log.info("Data connections are being disabled.");
 			systemModel.setWANEnabled(false);
 			systemModel.setWifiEnabled(false);
 		}
-		if (appModel.AppSettingsCurrent["BluetoothOptionEnabled"] == "true")
+		if (appModel.AppSettingsCurrent["BluetoothOptionEnabled"])
 		{
 			Mojo.Log.info("Bluetooth radio is being disabled.");
 			systemModel.setBluetoothEnabled(false);
