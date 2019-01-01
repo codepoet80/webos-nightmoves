@@ -8,6 +8,7 @@ var launchParams = null;
 var alarmUtils = new Object();
 var AppRunning = false;
 var ScreenWasOn = false;
+var ProblemAppsRunning = [];
 var IsTouchPad = false;
 var MainStageName = "main";
 function AppAssistant(appController) {
@@ -29,6 +30,24 @@ AppAssistant.prototype.handleLaunch = function(params) {
 	appModel.LoadSettings();
 	Mojo.Log.info("** App Settings: " + JSON.stringify(appModel.AppSettingsCurrent));
 	IsTouchPad = Mojo.Environment.DeviceInfo.platformVersionMajor>=3;
+	systemModel.GetRunningApps(this.checkRunningApps.bind(this));
+};
+
+//LAUNCH STEP 1B - Determine what apps are running
+AppAssistant.prototype.checkRunningApps = function(response)
+{
+	var appList = JSON.stringify(response);
+	Mojo.Log.info("Running apps are: " + appList);
+	//Problem apps are ones that force the display to stay on.
+	var problemApps = ["com.palm.app.kindle", "org.scummvm.scummvm"]
+	for (var l=0;l<response.running.length;l++)
+	{
+		if(JSON.stringify(problemApps).indexOf(response.running[l].id) != -1)
+		{
+			Mojo.Log.info("found a problem app: " + response.running[l].id)
+			ProblemAppsRunning[ProblemAppsRunning.length] = response.running[l].processid;
+		}
+	}
 
 	//Determine if we were already running
 	var mainStage = this.controller.getStageProxy(MainStageName);
@@ -41,7 +60,7 @@ AppAssistant.prototype.handleLaunch = function(params) {
 		Mojo.Log.info("Found no existing stage, app was not running");
 	//We'll finish setting up after we learn if the screen is on or off
 	systemModel.GetDisplayState(this.getDisplayStateCallBack.bind(this));
-};
+}
 
 //LAUNCH STEP 2 - After determining state, decide what to launch
 AppAssistant.prototype.getDisplayStateCallBack = function (response)
@@ -123,6 +142,7 @@ AppAssistant.prototype.doAlarmApply = function(AlarmName)
 {
 	Mojo.Log.warn("Silently applying alarm, screen was on: " + ScreenWasOn + ", app was running: " + AppRunning);
 	//Find the best way to do alarm things, depending on device type
+	this.handleProblemApps();
 	if (IsTouchPad)
 	{
 		//If this is a Touchpad, we have to do some extra heroics
@@ -134,7 +154,7 @@ AppAssistant.prototype.doAlarmApply = function(AlarmName)
 		//Reset alarms
 		alarmUtils.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
 		//Wait for everything to happen, then clean up
-		setTimeout("doTouchPadAlarmFinish()", 2500);
+		setTimeout(this.doTouchPadAlarmFinish.bind(this), 2500);
 	}
 	else
 	{
@@ -145,6 +165,40 @@ AppAssistant.prototype.doAlarmApply = function(AlarmName)
 		//Clean up
 		this.doPalmPreAlarmFinish();	
 	}	
+}
+
+AppAssistant.prototype.handleProblemApps = function()
+{
+	if (ProblemAppsRunning.length > 0)
+	{
+		//If we're allowed to, kill the problem app
+		if (appModel.AppSettingsCurrent["KillProblemApps"])
+		{
+			Mojo.Log.warn("Handling " + ProblemAppsRunning.length + " problem apps by killing them.");
+			for (var a=0;a<ProblemAppsRunning.length;a++)
+			{
+				systemModel.KillApp(ProblemAppsRunning[a]);
+			}
+		}
+		else	//Show a card so that the problem app doesn't have focus
+		{
+			Mojo.Log.warn("Handling " + ProblemAppsRunning.length + " problem apps by stealing focus.");
+			if (AppRunning)
+			{
+				var stageController = this.controller.getStageController(MainStageName);
+				stageController.activate();
+			}
+			else
+			{
+				var pushMainScene = function(stageController) {
+					stageController.pushScene(MainStageName);
+				};
+				var stageArguments = {name: MainStageName, lightweight: true};
+				this.controller.createStageWithCallback(stageArguments, pushMainScene);
+			}
+		}
+	}
+	Mojo.Log.info("There were no problem apps to handle");
 }
 
 //Called right away on the Pre to put the environment back the way it was before the alarm launch
@@ -159,7 +213,7 @@ AppAssistant.prototype.doPalmPreAlarmFinish = function()
 }
 
 //Fires after a delay on the TouchPad to put the environment back the way it was before the alarm launch
-doTouchPadAlarmFinish = function()
+AppAssistant.prototype.doTouchPadAlarmFinish = function()
 {
 	Mojo.Log.info("Doing TouchPad Alarm Finish at " + new Date() + ", Screen Was On: " + ScreenWasOn + ", App Was Running: " + AppRunning);
 	var stageController = Mojo.Controller.appController.getStageController(MainStageName);

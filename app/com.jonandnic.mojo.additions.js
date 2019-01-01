@@ -11,12 +11,11 @@ Mojo Additions
 this.Additions = function () {
 }
 
-Additions.ShowDialogBox = function(title, message){
+Additions.ShowDialogBox = function(title, message, callBack){
     var stageController = Mojo.Controller.getAppController().getActiveStageController();
     this.controller = stageController.activeScene();
-    
     this.controller.showAlertDialog({
-    onChoose: function(value) {},
+        onChoose: callBack,
         title:title,
         message:message,
             choices:[ {label:'OK', value:'OK'} ],

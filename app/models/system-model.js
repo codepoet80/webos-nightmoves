@@ -1,6 +1,6 @@
 /*
 System Model
- Version 0.7
+ Version 0.8
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -412,3 +412,41 @@ SystemModel.prototype.bluetoothControlService = function(url, params, cb)
 		parameters: params,
 		}); 
 };
+
+SystemModel.prototype.GetRunningApps = function(callBack)
+{
+	if (Mojo.Controller.appInfo.id.indexOf("com.palm.webos") != -1)
+	{
+		Mojo.Log.info("Getting list of running apps.");
+		this.appRequest = new Mojo.Service.Request("palm://com.palm.applicationManager/running", {
+			method: "",
+			parameters: { },
+			onSuccess:callBack,
+			onFailure:callBack
+		});
+	}
+	else
+	{
+		Mojo.Log.error("Privileged system services can only be called by apps with an ID that starts with 'com.palm.webos'!");
+		throw("Privileged system service call not allowed for this App ID!");
+	}
+}
+
+SystemModel.prototype.KillApp = function(appId)
+{
+	if (Mojo.Controller.appInfo.id.indexOf("com.palm.webos") != -1)
+	{
+		Mojo.Log.info("Killing app id: " + appId);
+		this.appRequest = new Mojo.Service.Request("palm://com.palm.applicationManager", {
+			method: "close",
+			parameters: { "processId": appId },
+			onSuccess: function(response) { Mojo.Log.info("App was killed: " + appId); },
+			onFailure: function(response) { Mojo.Log.warn("App was not killed!", JSON.stringify(response)); }
+		});
+	}
+	else
+	{
+		Mojo.Log.error("Privileged system services can only be called by apps with an ID that starts with 'com.palm.webos'!");
+		throw("Privileged system service call not allowed for this App ID!");
+	}
+}

@@ -17,3 +17,4 @@ It currently works perfectly on the Pre3, probably works on Pre2, and works grea
 - 1.0.3 - Fix another launch bug on Pre where the app wouldn't re-close after alarm launch.
 - 1.0.4 - Stage-less launch allows applying settings without starting the whole app.
 - 1.0.5 - Add a toggle Bluetooth daily feature.
+- 1.0.6 - Add strategies for handling problem apps that keep the screen on.

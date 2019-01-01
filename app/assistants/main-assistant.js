@@ -14,12 +14,12 @@ MainAssistant.prototype.setup = function()
 	this.appMenuAttributes = {omitDefaultItems: true};
 	this.appMenuModel = { label: "Settings",
 		items: [
-			//{label: ('Advanced'),
-			//	items: [
-			//		{label: "Debug Timers", checkEnabled: true, command: 'do-toggleDebug', chosen:appModel.AppSettingsCurrent.Debug },		
-			//	]
-			//},
-			{label: "Precise Timers", checkEnabled: true, command: 'do-togglePrecision', chosen:appModel.AppSettingsCurrent.PreciseTimers },
+			{label: ('Advanced'),
+				items: [
+					{label: "Kill Problem Apps", checkEnabled: true, command: 'do-toggleAppKill', chosen:appModel.AppSettingsCurrent.KillProblemApps },		
+					{label: "Precise Timers", checkEnabled: true, command: 'do-togglePrecision', chosen:appModel.AppSettingsCurrent.PreciseTimers },
+				]
+			},
 			{label: "Reset Settings", command: 'do-resetSettings'}, 
 			{label: "About Night Moves", command: 'do-myAbout'}
 		]
@@ -210,9 +210,9 @@ MainAssistant.prototype.setupToggle = function (toggleName, toggleValue)
 {
 	this.attribute = {
 		trueLabel:  'on',
-		trueValue:  'true',
+		trueValue:  true,
 		falseLabel:  'off',
-		falseValue: 'false',
+		falseValue: false,
 		fieldName:  'toggle'
 	}
 	this.model = {
@@ -229,7 +229,7 @@ MainAssistant.prototype.togglePressed = function(event)
 	//Change the value in settings
 	var findSettingName = event.srcElement.id.replace("att-toggle-", "");
 	Mojo.Log.info("toggle setting: " + findSettingName);
-	appModel.AppSettingsCurrent[findSettingName + "Enabled"] = event.value.toString();
+	appModel.AppSettingsCurrent[findSettingName + "Enabled"] = Boolean(event.value);
 	appModel.SaveSettings();
 	Mojo.Log.info("**** Settings when toggle pressed: " + JSON.stringify(appModel.AppSettingsCurrent));
 
@@ -247,7 +247,8 @@ MainAssistant.prototype.checkBoxChange = function (event)
 }
 
 //Handle menu and button bar commands
-MainAssistant.prototype.handleCommand = function(event) {
+MainAssistant.prototype.handleCommand = function(event) 
+{
 	var appController = Mojo.Controller.getAppController();
 	var stageController = appController.getActiveStageController();
 
@@ -266,15 +267,22 @@ MainAssistant.prototype.handleCommand = function(event) {
 				}
 				stageController.swapScene({transition: Mojo.Transition.none, name: "main"});
 				break;
+			case 'do-toggleAppKill':
+				var messageToShow = "";
+				if (appModel.AppSettingsCurrent.KillProblemApps == true)
+				{
+					appModel.AppSettingsCurrent.KillProblemApps = false;
+					messageToShow = "Problem Apps are apps that are known to keep the screen on. With this setting, Night Moves will launch a scene to take focus from the problem app so the screen can shut off.";
+				}
+				else
+				{
+					appModel.AppSettingsCurrent.KillProblemApps = true;
+					messageToShow = "Problem Apps are apps that are known to keep the screen on. With this setting, Night Moves will attempt to kill problem apps so the screen can shut off."
+				}
+				Mojo.Additions.ShowDialogBox("Problem Apps", messageToShow, this.problemAppsToggled.bind(this));
+				break;
 			case 'do-myAbout':
-				this.controller.showAlertDialog({
-					onChoose: function(value) {},
-					title: $L("Night Moves"),
-					message: $L("Copyright 2018, Jonathan Wise. Available under an MIT License. Source code available at: https://github.com/codepoet80/webos-nightmoves"),
-					choices:[
-						{label:$L("OK"), value:""}
-					]
-				});
+				Mojo.Additions.ShowDialogBox("Night Moves", "Copyright 2018, Jonathan Wise. Available under an MIT License. Source code available at: https://github.com/codepoet80/webos-nightmoves");
 				break;
 			case 'do-resetSettings':
 				alarmUtils.manageAlarm("Morn", false, false, false);
@@ -285,6 +293,13 @@ MainAssistant.prototype.handleCommand = function(event) {
 		}
 	}
 }; 
+
+MainAssistant.prototype.problemAppsToggled = function(response)
+{
+	var appController = Mojo.Controller.getAppController();
+	var stageController = appController.getActiveStageController();
+	stageController.swapScene({transition: Mojo.Transition.none, name: "main"});
+}
 
 MainAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
