@@ -33,7 +33,8 @@ var AppModel = function()
         EveStart: this.BaseDateString + "19:30:00",
         EveBright: 40,
         EveVolume: 30,
-        NiteEnabled: false,
+		NiteEnabled: false,
+		NiteReboot: false,
         NiteStart: this.BaseDateString + "22:00:00",
         NiteBright: 5,
         NiteVolume: 1

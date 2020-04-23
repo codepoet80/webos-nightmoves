@@ -278,6 +278,20 @@ AppAssistant.prototype.applySettingsFromAlarm = function(settingName)
 			Mojo.Log.info("Bluetooth radio is being disabled.");
 			systemModel.setBluetoothEnabled(false);
 		}
+		if (appModel.AppSettingsCurrent["NiteReboot"] == true)
+		{
+			Mojo.Log.warn("Rebooting per user setting.");
+			new Mojo.Service.Request('palm://com.palm.power/shutdown', {
+					method: 'machineReboot',
+					parameters: {
+						reason: "User initiated/NightMoves"
+					}
+			});
+		}
+		else
+		{
+			Mojo.Log.info("Not rebooting per user setting.");
+		}
 	}
 	
 	//Apply the settings

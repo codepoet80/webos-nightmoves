@@ -53,6 +53,10 @@ MainAssistant.prototype.setup = function()
 	this.controller.setupWidget('checkMornDelayWeekend', { property: 'value', trueValue: true, falseValue: false }, { value: Boolean(appModel.AppSettingsCurrent["MornDelayWeekend"]), disabled: false } );
 	Mojo.Event.listen(this.controller.get('checkMornDelayWeekend'), Mojo.Event.propertyChange, this.checkBoxChange.bind(this));
 
+	//Setup nightly reboot checkbox
+	this.controller.setupWidget('checkNiteReboot', { property: 'value', trueValue: true, falseValue: false }, { value: Boolean(appModel.AppSettingsCurrent["NiteReboot"]), disabled: false } );
+	Mojo.Event.listen(this.controller.get('checkNiteReboot'), Mojo.Event.propertyChange, this.checkBoxChange.bind(this));
+
 	//App Menu (handled in stage controller: stage-assistant.js)
 	this.controller.setupWidget(Mojo.Menu.appMenu, this.appMenuAttributes, this.appMenuModel);
 
@@ -309,10 +313,12 @@ MainAssistant.prototype.deactivate = function(event) {
 	Mojo.Event.stopListening(this.controller.get('att-toggle-Nite'), Mojo.Event.propertyChange, this.togglePressed);
 	Mojo.Event.stopListening(this.controller.get('sldMornBright'), Mojo.Event.propertyChanged, this.sliderChanged);
 	Mojo.Event.stopListening(this.controller.get('sldMornVolume'), Mojo.Event.propertyChanged, this.sliderChanged);
+	Mojo.Event.stopListening(this.controller.get('checkMornDelayWeekend'), Mojo.Event.propertyChange, this.checkBoxChange);
 	Mojo.Event.stopListening(this.controller.get('sldEveBright'), Mojo.Event.propertyChanged, this.sliderChanged);
 	Mojo.Event.stopListening(this.controller.get('sldEveVolume'), Mojo.Event.propertyChanged, this.sliderChanged);
 	Mojo.Event.stopListening(this.controller.get('sldNiteBright'), Mojo.Event.propertyChanged, this.sliderChanged);
 	Mojo.Event.stopListening(this.controller.get('sldNiteVolume'), Mojo.Event.propertyChanged, this.sliderChanged);
+	Mojo.Event.stopListening(this.controller.get('checkNiteReboot'), Mojo.Event.propertyChange, this.checkBoxChange);
 
 	//Save settings
 	Mojo.Log.info("Night moves is being deactivated.");
