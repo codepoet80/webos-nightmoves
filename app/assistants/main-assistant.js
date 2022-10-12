@@ -282,7 +282,7 @@ MainAssistant.prototype.handleCommand = function(event)
 				Mojo.Additions.ShowDialogBox("Problem Apps", messageToShow, this.problemAppsToggled.bind(this));
 				break;
 			case 'do-myAbout':
-				Mojo.Additions.ShowDialogBox("Night Moves", "Copyright 2018, Jonathan Wise. Available under an MIT License. Source code available at: https://github.com/codepoet80/webos-nightmoves");
+				Mojo.Additions.ShowDialogBox("Night Moves", "Copyright 2018, Jon W. Available under an MIT License. Source code available at: https://github.com/codepoet80/webos-nightmoves");
 				break;
 			case 'do-resetSettings':
 				alarmUtils.manageAlarm("Morn", false, false, false);
