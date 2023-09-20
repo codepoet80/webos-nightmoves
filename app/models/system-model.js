@@ -1,6 +1,6 @@
 /*
 System Model
- Version 0.8
+ Version 0.9
  Created: 2018
  Author: Jonathan Wise
  License: MIT
@@ -296,6 +296,24 @@ SystemModel.prototype.SetDisplayState = function (state)
 				Mojo.Log.error("Display set error: ", JSON.stringify(response), response.errorText);
 			}
 		});
+	}
+	else
+	{
+		Mojo.Log.error("Privileged system services can only be called by apps with an ID that starts with 'com.palm.webos'!");
+		throw("Privileged system service call not allowed for this App ID!");
+	}
+}
+
+//Restart Luna (depends on Preware)
+SystemModel.prototype.restartLuna = function() {
+	if (Mojo.Controller.appInfo.id.indexOf("com.palm.webos") != -1)
+	{
+		Mojo.Log.info("Restarting Luna");
+		this.service_identifier = 'palm://org.webosinternals.ipkgservice';
+		var request = new Mojo.Service.Request(this.service_identifier, {
+				method: 'restartLuna',	
+			});
+		return request;
 	}
 	else
 	{

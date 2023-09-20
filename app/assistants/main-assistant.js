@@ -1,6 +1,7 @@
 /*
 In (fairly purely) MVC fashion, this assistant is primarily concerned with UI interactions on the main scene.
 */
+var updaterModel = null;
 function MainAssistant() {
 	
 }
@@ -33,6 +34,9 @@ MainAssistant.prototype.setup = function()
 	this.setupToggle('NotificationOption', appModel.AppSettingsCurrent["NotificationOptionEnabled"]);
 	this.setupToggle('DataOption', appModel.AppSettingsCurrent["DataOptionEnabled"]);
 	this.setupToggle('BluetoothOption', appModel.AppSettingsCurrent["BluetoothOptionEnabled"]);
+	if (appModel.AppSettingsCurrent["LunaRestartOptionEnabled"] == null || appModel.AppSettingsCurrent["LunaRestartOptionEnabled"] == undefined)
+		appModel.AppSettingsCurrent["LunaRestartOptionEnabled"] = false;
+	this.setupToggle('LunaRestartOption', appModel.AppSettingsCurrent["LunaRestartOptionEnabled"]);
 
 	//Setup sliders
 	this.sliderChanged = this.sliderChanged.bind(this);
@@ -56,8 +60,8 @@ MainAssistant.prototype.setup = function()
 	//App Menu (handled in stage controller: stage-assistant.js)
 	this.controller.setupWidget(Mojo.Menu.appMenu, this.appMenuAttributes, this.appMenuModel);
 
-	//With each launch, maybe we should re-establish alarms, in order to "self-heal"
-	//stageController.manageAllAlarms(appModel.AppSettingsCurrent);
+	updaterModel = new UpdaterModel(); //Make sure the Updater model is included in your sources.json
+    updaterModel.CheckForUpdate("Night Moves", this.handleUpdateResponse.bind(this));
 }
 
 MainAssistant.prototype.activate = function(event) {
@@ -74,7 +78,19 @@ MainAssistant.prototype.activate = function(event) {
 			welcomeMessage += "<br><br><b>TouchPad Usage Notes:</b> The lock screen can cause problems on the TouchPad. To work-around, you can either disable the lock screen with a tweak, or make sure this app is closed when not in use."
 		}
 		Mojo.Additions.ShowDialogBox("Welcome to Night Moves!", welcomeMessage);
+	} else {
+		//With each launch, let's try to re-establish alarms, in order to "self-heal"
+		alarmUtils.manageAllAlarms(appModel.AppSettingsCurrent, false);
 	}
+}
+
+MainAssistant.prototype.handleUpdateResponse = function(responseObj) {
+    if (responseObj && responseObj.updateFound) {
+        updaterModel.PromptUserForUpdate(function(response) {
+            if (response)
+                updaterModel.InstallUpdate();
+        }.bind(this));
+    }
 }
 
 MainAssistant.prototype.setupTimePicker = function (hiddenDivName, settings) {
@@ -313,6 +329,12 @@ MainAssistant.prototype.deactivate = function(event) {
 	Mojo.Event.stopListening(this.controller.get('sldEveVolume'), Mojo.Event.propertyChanged, this.sliderChanged);
 	Mojo.Event.stopListening(this.controller.get('sldNiteBright'), Mojo.Event.propertyChanged, this.sliderChanged);
 	Mojo.Event.stopListening(this.controller.get('sldNiteVolume'), Mojo.Event.propertyChanged, this.sliderChanged);
+	Mojo.Event.stopListening(this.controller.get('att-toggle-Morn'), Mojo.Event.propertyChange, this.togglePressed);
+	Mojo.Event.stopListening(this.controller.get('att-toggle-Eve'), Mojo.Event.propertyChange, this.togglePressed);
+	Mojo.Event.stopListening(this.controller.get('att-toggle-NotificationOption'), Mojo.Event.propertyChange, this.togglePressed);
+	Mojo.Event.stopListening(this.controller.get('att-toggle-DataOption'), Mojo.Event.propertyChange, this.togglePressed);
+	Mojo.Event.stopListening(this.controller.get('att-toggle-BluetoothOption'), Mojo.Event.propertyChange, this.togglePressed);
+	Mojo.Event.stopListening(this.controller.get('att-toggle-LunaRestartOption'), Mojo.Event.propertyChange, this.togglePressed);
 
 	//Save settings
 	Mojo.Log.info("Night moves is being deactivated.");

@@ -8,4 +8,5 @@
         "source": "app/assistants/main-assistant.js"
     },
     {"source": "app/assistants/alarm-assistant.js"},
+    {"source": "app/models/updater-model.js"}
 ]

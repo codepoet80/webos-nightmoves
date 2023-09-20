@@ -23,6 +23,7 @@ var AppModel = function()
 		NotificationOptionEnabled: false,
 		DataOptionEnabled: false,
 		BluetoothOptionEnabled: false,
+		LunaRestartOptionEnabled: false,
 		KillProblemApps: false,
 		MornEnabled: false,
 		MornDelayWeekend: false,
@@ -36,7 +37,8 @@ var AppModel = function()
         NiteEnabled: false,
         NiteStart: this.BaseDateString + "22:00:00",
         NiteBright: 5,
-        NiteVolume: 1
+        NiteVolume: 1,
+		DailyStart: this.BaseDateString + "00:00:00"
     };
 }
 

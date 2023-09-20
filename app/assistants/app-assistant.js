@@ -232,61 +232,72 @@ AppAssistant.prototype.applySettingsFromAlarm = function(settingName)
 {
 	Mojo.Log.warn("Applying settings for " + settingName + " at " + new Date());
 
-	var showSettingName;
-	if (settingName == "Morn") 
-	{ 
-		showSettingName = "morning"; 
-		if (appModel.AppSettingsCurrent["NotificationOptionEnabled"])
-		{
-			Mojo.Log.info("Notifications are being enabled.");
-			systemModel.setShowNotificationsWhenLocked(true);
-			systemModel.setLEDLightNotifications(true);
+	if (settingName == "Daily")
+	{	
+		if (appModel.AppSettingsCurrent["LunaRestartOptionEnabled"]) {
+			Mojo.Log.info("A daily Luna restart was enabled...");
+			systemModel.restartLuna();
 		}
-		if (appModel.AppSettingsCurrent["DataOptionEnabled"])
-		{
-			Mojo.Log.info("Data connections are being enabled.");
-			systemModel.setWANEnabled(true);
-			systemModel.setWifiEnabled(true);
-		}
-		if (appModel.AppSettingsCurrent["BluetoothOptionEnabled"])
-		{
-			Mojo.Log.info("Bluetooth radio is being enabled.");
-			systemModel.setBluetoothEnabled(true);
-		}
-	}
-	if (settingName == "Eve") 
-	{ 
-		showSettingName = "evening"; 
-	}
-	if (settingName == "Nite") 
-	{ 
-		showSettingName = "night"; 
-		if (appModel.AppSettingsCurrent["NotificationOptionEnabled"])
-		{
-			Mojo.Log.info("Notifications are being disabled.");
-			systemModel.setShowNotificationsWhenLocked(false);
-			systemModel.setLEDLightNotifications(false);
-		}
-		if (appModel.AppSettingsCurrent["DataOptionEnabled"])
-		{
-			Mojo.Log.info("Data connections are being disabled.");
-			systemModel.setWANEnabled(false);
-			systemModel.setWifiEnabled(false);
-		}
-		if (appModel.AppSettingsCurrent["BluetoothOptionEnabled"])
-		{
-			Mojo.Log.info("Bluetooth radio is being disabled.");
-			systemModel.setBluetoothEnabled(false);
-		}
-	}
-	
-	//Apply the settings
-	systemModel.SetSystemBrightness(appModel.AppSettingsCurrent[settingName + "Bright"]);
-	systemModel.SetSystemVolume(appModel.AppSettingsCurrent[settingName + "Volume"]);
-	systemModel.SetRingtoneVolume(appModel.AppSettingsCurrent[settingName + "Volume"]);
+	} 
+	else 
+	{
 
-	//Tell user what happened
-	Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
+		var showSettingName;
+		if (settingName == "Morn") 
+		{ 
+			showSettingName = "morning"; 
+			if (appModel.AppSettingsCurrent["NotificationOptionEnabled"])
+			{
+				Mojo.Log.info("Notifications are being enabled.");
+				systemModel.setShowNotificationsWhenLocked(true);
+				systemModel.setLEDLightNotifications(true);
+			}
+			if (appModel.AppSettingsCurrent["DataOptionEnabled"])
+			{
+				Mojo.Log.info("Data connections are being enabled.");
+				systemModel.setWANEnabled(true);
+				systemModel.setWifiEnabled(true);
+			}
+			if (appModel.AppSettingsCurrent["BluetoothOptionEnabled"])
+			{
+				Mojo.Log.info("Bluetooth radio is being enabled.");
+				systemModel.setBluetoothEnabled(true);
+			}
+		}
+		if (settingName == "Eve") 
+		{ 
+			showSettingName = "evening"; 
+		}
+		if (settingName == "Nite") 
+		{ 
+			showSettingName = "night"; 
+			if (appModel.AppSettingsCurrent["NotificationOptionEnabled"])
+			{
+				Mojo.Log.info("Notifications are being disabled.");
+				systemModel.setShowNotificationsWhenLocked(false);
+				systemModel.setLEDLightNotifications(false);
+			}
+			if (appModel.AppSettingsCurrent["DataOptionEnabled"])
+			{
+				Mojo.Log.info("Data connections are being disabled.");
+				systemModel.setWANEnabled(false);
+				systemModel.setWifiEnabled(false);
+			}
+			if (appModel.AppSettingsCurrent["BluetoothOptionEnabled"])
+			{
+				Mojo.Log.info("Bluetooth radio is being disabled.");
+				systemModel.setBluetoothEnabled(false);
+			}
+		}
+		
+		//Apply the settings
+		systemModel.SetSystemBrightness(appModel.AppSettingsCurrent[settingName + "Bright"]);
+		systemModel.SetSystemVolume(appModel.AppSettingsCurrent[settingName + "Volume"]);
+		systemModel.SetRingtoneVolume(appModel.AppSettingsCurrent[settingName + "Volume"]);
+
+		//Tell user what happened
+		Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
+	}
 }
 
 AppAssistant.prototype.manageAllAlarms = function(appSettings, currentAlarmName)
@@ -295,6 +306,9 @@ AppAssistant.prototype.manageAllAlarms = function(appSettings, currentAlarmName)
 	this.manageAlarm("Morn", appSettings["MornStart"], appSettings["MornEnabled"], currentAlarmName, true);
 	this.manageAlarm("Eve", appSettings["EveStart"], appSettings["EveEnabled"], currentAlarmName, true);
 	this.manageAlarm("Nite", appSettings["NiteStart"], appSettings["NiteEnabled"], currentAlarmName, true);
+	if (appModel.AppSettingsCurrent["LunaRestartOptionEnabled"] == true) {
+		this.manageAlarm("Daily", appSettings["DailyStart"], appSettings["LunaRestartOptionEnabled"], currentAlarmName, true);
+	}
 }
 
 //This gnarly function actually sets the alarms. Depending on how far out the next alarm time is, we might need an absolute or relative alarm.
