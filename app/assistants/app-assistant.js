@@ -158,10 +158,10 @@ AppAssistant.prototype.doAlarmApply = function(AlarmName)
 	}
 	else
 	{
-		//For Pre phones, we can just directly apply the settings
-		alarmUtils.applySettingsFromAlarm(AlarmName);
 		//Reset alarms
 		alarmUtils.manageAllAlarms(appModel.AppSettingsCurrent, AlarmName);
+		//For Pre phones, we can just directly apply the settings
+		alarmUtils.applySettingsFromAlarm(AlarmName);
 		//Clean up
 		this.doPalmPreAlarmFinish();	
 	}	
@@ -230,6 +230,7 @@ AppAssistant.prototype.doTouchPadAlarmFinish = function()
 //Do the actual night moves associated with this alarm
 AppAssistant.prototype.applySettingsFromAlarm = function(settingName)
 {
+	var showSettingName = "";
 	Mojo.Log.warn("Applying settings for " + settingName + " at " + new Date());
 
 	if (settingName == "Daily")
@@ -241,8 +242,6 @@ AppAssistant.prototype.applySettingsFromAlarm = function(settingName)
 	} 
 	else 
 	{
-
-		var showSettingName;
 		if (settingName == "Morn") 
 		{ 
 			showSettingName = "morning"; 
@@ -296,7 +295,8 @@ AppAssistant.prototype.applySettingsFromAlarm = function(settingName)
 		systemModel.SetRingtoneVolume(appModel.AppSettingsCurrent[settingName + "Volume"]);
 
 		//Tell user what happened
-		Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
+		if (showSettingName != "")
+			Mojo.Controller.getAppController().showBanner("Night Moves set to " + showSettingName + ".", {source: 'notification'});
 	}
 }
 
@@ -306,7 +306,7 @@ AppAssistant.prototype.manageAllAlarms = function(appSettings, currentAlarmName)
 	this.manageAlarm("Morn", appSettings["MornStart"], appSettings["MornEnabled"], currentAlarmName, true);
 	this.manageAlarm("Eve", appSettings["EveStart"], appSettings["EveEnabled"], currentAlarmName, true);
 	this.manageAlarm("Nite", appSettings["NiteStart"], appSettings["NiteEnabled"], currentAlarmName, true);
-	if (appModel.AppSettingsCurrent["LunaRestartOptionEnabled"] == true) {
+	if (appSettings["LunaRestartOptionEnabled"] == true) {
 		this.manageAlarm("Daily", appSettings["DailyStart"], appSettings["LunaRestartOptionEnabled"], currentAlarmName, true);
 	}
 }

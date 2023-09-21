@@ -79,9 +79,9 @@ MainAssistant.prototype.activate = function(event) {
 		}
 		Mojo.Additions.ShowDialogBox("Welcome to Night Moves!", welcomeMessage);
 	} else {
-		//With each launch, what if we re-establish alarms, in order to "self-heal"?
-		//alarmUtils.manageAllAlarms(appModel.AppSettingsCurrent, false);
-		//Note: This forces nearby alarms to be relative, which makes testing difficult
+		//With each (normal) launch, what if we re-establish alarms, in order to "self-heal"?
+		//Note: This may cause issues with testing where time is set artificially
+		alarmUtils.manageAllAlarms(appModel.AppSettingsCurrent, true);
 	}
 }
 
