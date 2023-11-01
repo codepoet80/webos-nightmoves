@@ -325,7 +325,7 @@ AppAssistant.prototype.manageAlarm = function (alarmName, alarmTime, alarmEnable
 	var alarmType = "absolute";
 	if (alarmEnabled == "true" || alarmEnabled == true)
 	{
-		//now is the current datetime plus/minutes a minute, since alarms aren't precise
+		//now is the current datetime plus/minus a minute, since alarms aren't precise
 		var now = new Date();
 		var nowMax = new Date(now.setSeconds(now.getSeconds() + 60));
 		var nowMin = new Date(now.setSeconds(now.getSeconds() - 60));
